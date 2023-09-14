@@ -1,0 +1,9 @@
+*.class
+*.log
+.metadata/*
+.jar
+lib/*
+biblio/*
+.settings
+*.exe
+Thumbs.db
