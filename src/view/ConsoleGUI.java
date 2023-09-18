@@ -59,7 +59,7 @@ public class ConsoleGUI extends JFrame {
 	/**
 	 * Bouton radio pour le choix de conversion
 	 */
-	private static JRadioButton rdbtnCelsius = new JRadioButton("Celsius");
+	private JRadioButton rdbtnCelsius = new JRadioButton("Celsius");
 	JRadioButton rdbtnFahrenheit = new JRadioButton("Fahrenheit");
 
 	/**
@@ -94,53 +94,33 @@ public class ConsoleGUI extends JFrame {
 	 * Affiche la temp�rature minimale sur la p�riode
 	 * @see JTextField
 	 */
-	private static JTextField tempMin;
+	private JTextField tempMin;
 
 	/**
 	 * Affiche la temp�rature moyenne sur la p�riode
 	 * @see JTextField
 	 */
-	private static JTextField tempMoy;
+	private JTextField tempMoy;
 
 	/**
 	 * Affiche la temp�rature maximale sur la p�riode
 	 * @see JTextField
 	 */
-	private static JTextField tempMax;
+	private JTextField tempMax;
 
 	/**
 	 * Pour recevoir les donn�es collect�es
 	 * @see JTable
 	 */
-	private static JTable laTable;
-
-	/**
-	 * Un objet de la classe Mesure
-	 * @see model.Mesure
-	 */
-	private static Mesure uneMesure;
-
-	/**
-	 * Pour recevoir les donn�es collect�es
-	 * 
-	 * @see ArrayList
-	 * @see model.Mesure
-	 */
-	private static ArrayList<Mesure> lesMesures;
+	private JTable laTable;
 
 	/**
 	 * <p>
 	 * Pour recevoir le JTable qui contient les mesures selectionn�es
 	 * </p>
 	 */
-	private static JScrollPane scrollPane = new JScrollPane();
+	private JScrollPane scrollPane = new JScrollPane();
 
-	/**
-	 * <p>
-	 * Tableau d'objet pour alimenter la JTable
-	 * </p>
-	 */
-	private static Object[][] data;
 
 	/**
 	 * <p>
@@ -155,7 +135,6 @@ public class ConsoleGUI extends JFrame {
 	JPanel pnlBounds = new JPanel();
 
 	public ConsoleGUI(Controller controller) throws ParseException {
-		// Appelle le constructeur de la classe m�re
 		setIconImage(Toolkit.getDefaultToolkit().getImage("img/vinci_ico.jpg"));
 		setTitle("Vinci Thermo Green");
 		setSize(712, 510);
@@ -349,11 +328,9 @@ public class ConsoleGUI extends JFrame {
 		
 		this.setLocation(100, 100);
 		control = controller;
-		lesMesures = controller.getLesMesures();
-		laTable = setTable(lesMesures);
+		laTable = setTable(controller.getMesures());
 		scrollPane.setViewportView(laTable);
 		setChart();
-		setVisible(true);
 	}
 
 	/**
@@ -367,8 +344,10 @@ public class ConsoleGUI extends JFrame {
 	 * @param ArrayList<Mesure>
 	 * @return Object[][]
 	 */
-	private static JTable setTable(ArrayList<Mesure> mesures) {
+	private JTable setTable(ArrayList<Mesure> mesures) {
 
+		Mesure mesure;
+		
 		float min = 0;
 		float max = 0;
 		float moy = 0;
@@ -385,43 +364,41 @@ public class ConsoleGUI extends JFrame {
 
 			for (int i = 0; i < mesures.size(); i++) {
 
-				uneMesure = lesMesures.get(i);
-				dataTable[i][0] = uneMesure.getNumZone();
-				dataTable[i][1] = uneMesure.getHoroDate();
-				dataTable[i][2] = round.format(uneMesure.getCelsius());
+				mesure = control.getMesures().get(i);
+				dataTable[i][0] = mesure.getNumZone();
+				dataTable[i][1] = mesure.getHoroDate();
+				dataTable[i][2] = round.format(mesure.getCelsius());
 
 				// Min, max et moy
-				moy = moy + uneMesure.getCelsius();
+				moy = moy + mesure.getCelsius();
 
-				if (uneMesure.getCelsius() < min) {
-					min = uneMesure.getCelsius();
+				if (mesure.getCelsius() < min) {
+					min = mesure.getCelsius();
 				}
-				if (uneMesure.getCelsius() > max) {
-					max = uneMesure.getCelsius();
+				if (mesure.getCelsius() > max) {
+					max = mesure.getCelsius();
 				}
 			}
 		} else {
-
-			System.out.println("Celsius : " + rdbtnCelsius.isSelected() + " | " + mesures.size());
 
 			// Initialisation de min et max
 			min = mesures.get(0).getFahrenheit();
 			max = mesures.get(0).getFahrenheit();
 
 			for (int i = 0; i < mesures.size(); i++) {
-				uneMesure = lesMesures.get(i);
-				dataTable[i][0] = uneMesure.getNumZone();
-				dataTable[i][1] = uneMesure.getHoroDate();
-				dataTable[i][2] = round.format(uneMesure.getFahrenheit());
+				mesure = control.getMesures().get(i);
+				dataTable[i][0] = mesure.getNumZone();
+				dataTable[i][1] = mesure.getHoroDate();
+				dataTable[i][2] = round.format(mesure.getFahrenheit());
 
 				// Min, max et moy
-				moy = moy + uneMesure.getFahrenheit();
+				moy = moy + mesure.getFahrenheit();
 
-				if (uneMesure.getFahrenheit() < min) {
-					min = uneMesure.getFahrenheit();
+				if (mesure.getFahrenheit() < min) {
+					min = mesure.getFahrenheit();
 				}
-				if (uneMesure.getCelsius() > max) {
-					max = uneMesure.getFahrenheit();
+				if (mesure.getCelsius() > max) {
+					max = mesure.getFahrenheit();
 				}
 			}
 		}
@@ -464,29 +441,31 @@ public class ConsoleGUI extends JFrame {
 	 */
 	public void setChart() {
 
+		Mesure mesure;
+		
 		int i1 = 0, i2 = 0, i3 = 0, i4 = 0;
 		DefaultCategoryDataset dataChart = new DefaultCategoryDataset();
 
 		// Set data ((Number)temp,zone,dateHeure)
-		for (int i = 0; i < lesMesures.size(); i++) {
+		for (int i = 0; i < control.getMesures().size(); i++) {
 
-			uneMesure = lesMesures.get(i);
+			mesure = control.getMesures().get(i);
 
-			switch (uneMesure.getNumZone()) {
+			switch (mesure.getNumZone()) {
 			case "01":
-				dataChart.addValue((Number) uneMesure.getCelsius(), uneMesure.getNumZone(), i1);
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i1);
 				i1++;
 				break;
 			case "02":
-				dataChart.addValue((Number) uneMesure.getCelsius(), uneMesure.getNumZone(), i2);
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i2);
 				i2++;
 				break;
 			case "03":
-				dataChart.addValue((Number) uneMesure.getCelsius(), uneMesure.getNumZone(), i3);
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i3);
 				i3++;
 				break;
 			case "04":
-				dataChart.addValue((Number) uneMesure.getCelsius(), uneMesure.getNumZone(), i4);
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i4);
 				i4++;
 				break;
 			default:
@@ -539,14 +518,14 @@ public class ConsoleGUI extends JFrame {
 	class filtrerData implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 
-			lesMesures = control.filtrerLesMesure(choixZone.getSelectedItem().toString());
+			control.setMesures(control.filtrerLesMesure(choixZone.getSelectedItem().toString()));
 			System.out.println(
 					"Filtrer Celsius : " + rdbtnCelsius.isSelected() + " Fahrenheit : " + rdbtnFahrenheit.isSelected()
 							+ " choix : " + choixZone.getSelectedItem() + " d�but : " + startDate.getText());
-			displayLesMesures(lesMesures);
+			displayLesMesures(control.getMesures());
 
 			// Construit le tableau d'objet
-			laTable = setTable(lesMesures);
+			laTable = setTable(control.getMesures());
 
 			// Definit le JScrollPane qui va recevoir la JTable
 			scrollPane.setViewportView(laTable);
