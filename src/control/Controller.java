@@ -5,6 +5,8 @@ package control;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.JFrame;
 
@@ -29,6 +31,11 @@ import view.LoginView;
  */
 public class Controller {
 
+	public static final Locale DEFAULT_LOCALE = Locale.getDefault();
+	
+	private ResourceBundle rc;
+	private Locale locale;
+	
 	//Views
 	private ConsoleGUI consoleGui;
 	private LoginView loginView;
@@ -37,6 +44,10 @@ public class Controller {
 	private ArrayList<Mesure> mesures = new ArrayList<Mesure>();
 	
 	public Controller() throws ParseException {
+		
+		this.locale = Locale.getDefault();
+		this.rc = ResourceBundle.getBundle("locale/locale", DEFAULT_LOCALE);
+		
 		//TODO Replace CSV data by database
 		FileUtils.lireCSV("data/mesures.csv", mesures);
 		
@@ -101,5 +112,13 @@ public class Controller {
 	
 	public void setMesures(ArrayList<Mesure> mesures) {
 		this.mesures = mesures;
+	}
+	
+	public Locale getLocale() {
+		return locale;
+	}
+	
+	public ResourceBundle getResourceBundle() {
+		return rc;
 	}
 }

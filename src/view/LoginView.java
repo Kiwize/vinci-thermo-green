@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import control.Controller;
@@ -22,7 +23,7 @@ public class LoginView extends JFrame {
 	public LoginView(Controller controller) {
 		this.controller = controller;
 
-		setTitle("ThermoGreen Login");
+		setTitle(controller.getResourceBundle().getString("loginViewWindowTitle"));
 		setResizable(false);
 
 		JPanel panel = new JPanel();
@@ -34,7 +35,7 @@ public class LoginView extends JFrame {
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
-		JLabel usernameLabel = new JLabel("Nom d'utilisateur");
+		JLabel usernameLabel = new JLabel(controller.getResourceBundle().getString("loginViewUsername"));
 		GridBagConstraints gbc_usernameLabel = new GridBagConstraints();
 		gbc_usernameLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_usernameLabel.anchor = GridBagConstraints.EAST;
@@ -43,7 +44,7 @@ public class LoginView extends JFrame {
 		panel.add(usernameLabel, gbc_usernameLabel);
 
 		usernameTextField = new JTextField();
-		usernameTextField.setToolTipText("Nom d'utilisateur");
+		usernameTextField.setToolTipText(controller.getResourceBundle().getString("loginViewUsername"));
 		GridBagConstraints gbc_usernameTextField = new GridBagConstraints();
 		gbc_usernameTextField.anchor = GridBagConstraints.WEST;
 		gbc_usernameTextField.insets = new Insets(0, 0, 5, 5);
@@ -52,7 +53,7 @@ public class LoginView extends JFrame {
 		panel.add(usernameTextField, gbc_usernameTextField);
 		usernameTextField.setColumns(10);
 
-		JLabel passwordLabel = new JLabel("Mot de passe");
+		JLabel passwordLabel = new JLabel(controller.getResourceBundle().getString("loginViewPassword"));
 		GridBagConstraints gbc_passwordLabel = new GridBagConstraints();
 		gbc_passwordLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_passwordLabel.anchor = GridBagConstraints.EAST;
@@ -60,7 +61,7 @@ public class LoginView extends JFrame {
 		gbc_passwordLabel.gridy = 2;
 		panel.add(passwordLabel, gbc_passwordLabel);
 
-		passwordTextField = new JTextField();
+		passwordTextField = new JPasswordField();
 		GridBagConstraints gbc_passwordTextField = new GridBagConstraints();
 		gbc_passwordTextField.anchor = GridBagConstraints.WEST;
 		gbc_passwordTextField.insets = new Insets(0, 0, 5, 5);
@@ -69,7 +70,7 @@ public class LoginView extends JFrame {
 		panel.add(passwordTextField, gbc_passwordTextField);
 		passwordTextField.setColumns(10);
 
-		JButton submitButton = new JButton("Connection");
+		JButton submitButton = new JButton(controller.getResourceBundle().getString("loginViewSubmit"));
 		submitButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
