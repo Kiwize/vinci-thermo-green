@@ -31,7 +31,7 @@ import view.LoginView;
  */
 public class Controller {
 
-	public static final Locale DEFAULT_LOCALE = Locale.getDefault();
+	public static final Locale DEFAULT_LOCALE = Locale.US;
 	
 	private ResourceBundle rc;
 	private Locale locale;

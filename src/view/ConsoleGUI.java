@@ -39,8 +39,9 @@ import control.Controller;
 import model.Mesure;
 
 /**
- * ConsoleGUI : IHM de l'application de consultation des temp�ratures
- * Projet Vinci Thermo Green
+ * ConsoleGUI : IHM de l'application de consultation des temp�ratures Projet
+ * Vinci Thermo Green
+ * 
  * @author J�r�me Valenti
  * @version 2.0.0
  * @see control.Controller
@@ -49,78 +50,26 @@ import model.Mesure;
 public class ConsoleGUI extends JFrame {
 
 	private Controller control;
-	/**
-	 * Container interm�diaire JPanel
-	 * Contient les crit�res de filtrage des donn�es de la table
-	 * @see JPanel
-	 */
 	private JPanel criteriaPanel = new JPanel();
 
-	/**
-	 * Bouton radio pour le choix de conversion
-	 */
-	private JRadioButton rdbtnCelsius = new JRadioButton("Celsius");
-	JRadioButton rdbtnFahrenheit = new JRadioButton("Fahrenheit");
+	private JRadioButton rdbtnCelsius;
+	private JRadioButton rdbtnFahrenheit;
 
-	/**
-	 * Liste de choix d'une zone</>
-	 * @see JComboBox
-	 */
-	JComboBox<String> choixZone = new JComboBox<String>();
-
-	/**
-	 * Saisie de la date de d�but de p�riode
-	 * @see JTextField
-	 */
+	private JComboBox<String> choixZone = new JComboBox<String>();
 	private JTextField startDate;
-
-	/**
-	 * Saisie de la date de fin de p�riode
-	 * @see JTextField
-	 */
 	private JTextField dateFin;
+	private JButton btnFiltrer;
 
-	private JButton btnFiltrer = new JButton("Filtrer");
+	private JPanel pnlParam = new JPanel();
+	private JPanel pnlGraph = new JPanel();
 
-	/**
-	 * Container interm�diaire JPanel
-	 * Contient l'affichage graphique des donn�es de la Table
-	 * @see JPanel
-	 */
-	JPanel pnlParam = new JPanel();
-	JPanel pnlGraph = new JPanel();
-
-	/**
-	 * Affiche la temp�rature minimale sur la p�riode
-	 * @see JTextField
-	 */
 	private JTextField tempMin;
-
-	/**
-	 * Affiche la temp�rature moyenne sur la p�riode
-	 * @see JTextField
-	 */
 	private JTextField tempMoy;
-
-	/**
-	 * Affiche la temp�rature maximale sur la p�riode
-	 * @see JTextField
-	 */
 	private JTextField tempMax;
 
-	/**
-	 * Pour recevoir les donn�es collect�es
-	 * @see JTable
-	 */
 	private JTable laTable;
 
-	/**
-	 * <p>
-	 * Pour recevoir le JTable qui contient les mesures selectionn�es
-	 * </p>
-	 */
 	private JScrollPane scrollPane = new JScrollPane();
-
 
 	/**
 	 * <p>
@@ -135,8 +84,15 @@ public class ConsoleGUI extends JFrame {
 	JPanel pnlBounds = new JPanel();
 
 	public ConsoleGUI(Controller controller) throws ParseException {
+
+		this.control = controller;
+
+		rdbtnCelsius = new JRadioButton(control.getResourceBundle().getString("consoleGUIViewCelsius"));
+		rdbtnFahrenheit = new JRadioButton(control.getResourceBundle().getString("consoleGUIViewFarhenheit"));
+		btnFiltrer = new JButton(control.getResourceBundle().getString("consoleGUIViewFilter"));
+
 		setIconImage(Toolkit.getDefaultToolkit().getImage("img/vinci_ico.jpg"));
-		setTitle("Vinci Thermo Green");
+		setTitle(control.getResourceBundle().getString("consoleGUIViewWindowTitle"));
 		setSize(712, 510);
 		setResizable(false);
 		setFont(new Font("Consolas", Font.PLAIN, 12));
@@ -184,12 +140,12 @@ public class ConsoleGUI extends JFrame {
 		choixZone.addItem("03");
 		choixZone.addItem("04");
 
-		JLabel zoneLabel = new JLabel("Zone");
+		JLabel zoneLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewZone"));
 		zoneLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		zoneLabel.setBounds(15, 54, 99, 14);
 		criteriaPanel.add(zoneLabel);
 
-		JLabel startLabel = new JLabel("D\u00E9but");
+		JLabel startLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewFrom"));
 		startLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		startLabel.setBounds(15, 83, 46, 14);
 		criteriaPanel.add(startLabel);
@@ -199,7 +155,7 @@ public class ConsoleGUI extends JFrame {
 		criteriaPanel.add(startDate);
 		startDate.setColumns(10);
 
-		JLabel endLabel = new JLabel("Fin");
+		JLabel endLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewTo"));
 		endLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		endLabel.setBounds(15, 114, 46, 14);
 		criteriaPanel.add(endLabel);
@@ -224,19 +180,20 @@ public class ConsoleGUI extends JFrame {
 
 		// D�finit le JPanel des param�tres du graphique
 		pnlParam.setBounds(340, 10, 355, 335);
-		pnlParam.setBorder(
-				new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Graphique des temp\u00E9ratures",
-						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(128, 128, 128)));
+		pnlParam.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
+				control.getResourceBundle().getString("consoleGUIViewGraphTemp"), TitledBorder.LEADING,
+				TitledBorder.TOP, null, new Color(128, 128, 128)));
 		pnlParam.setBackground(UIManager.getColor("Label.background"));
 		pnlParam.setLayout(null);
 		pane.add(pnlParam);
 
-		JCheckBox chckbxDistinctZone = new JCheckBox("Distinguer les zones");
+		JCheckBox chckbxDistinctZone = new JCheckBox(
+				control.getResourceBundle().getString("consoleGUIViewDistinguishZones"));
 		chckbxDistinctZone.setFont(new Font("Consolas", Font.PLAIN, 12));
 		chckbxDistinctZone.setBounds(15, 20, 165, 23);
 		pnlParam.add(chckbxDistinctZone);
 
-		JLabel lblTypeDeGraphique = new JLabel("Type de graphique");
+		JLabel lblTypeDeGraphique = new JLabel(control.getResourceBundle().getString("consoleGUIViewGraphType"));
 		lblTypeDeGraphique.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblTypeDeGraphique.setBounds(15, 50, 120, 14);
 		pnlParam.add(lblTypeDeGraphique);
@@ -245,11 +202,11 @@ public class ConsoleGUI extends JFrame {
 		choixGraphique.setBounds(152, 47, 190, 20);
 		pnlParam.add(choixGraphique);
 
-		JButton refreshButton = new JButton("Actualiser");
+		JButton refreshButton = new JButton(control.getResourceBundle().getString("consoleGUIViewRefresh"));
 		refreshButton.setBounds(222, 19, 120, 23);
 		pnlParam.add(refreshButton);
 
-		JLabel lblMin = new JLabel("Min");
+		JLabel lblMin = new JLabel(control.getResourceBundle().getString("consoleGUIViewMin"));
 		lblMin.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMin.setBounds(15, 306, 30, 14);
 		pnlParam.add(lblMin);
@@ -260,7 +217,7 @@ public class ConsoleGUI extends JFrame {
 		pnlParam.add(tempMin);
 		tempMin.setColumns(10);
 
-		JLabel lblMoy = new JLabel("Moy");
+		JLabel lblMoy = new JLabel(control.getResourceBundle().getString("consoleGUIViewAvg"));
 		lblMoy.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMoy.setBounds(137, 304, 30, 14);
 		pnlParam.add(lblMoy);
@@ -271,7 +228,7 @@ public class ConsoleGUI extends JFrame {
 		tempMoy.setBounds(177, 300, 50, 20);
 		pnlParam.add(tempMoy);
 
-		JLabel lblMax = new JLabel("Max");
+		JLabel lblMax = new JLabel(control.getResourceBundle().getString("consoleGUIViewMax"));
 		lblMax.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMax.setBounds(252, 304, 30, 14);
 		pnlParam.add(lblMax);
@@ -283,7 +240,8 @@ public class ConsoleGUI extends JFrame {
 		pnlParam.add(tempMax);
 
 		// D�finit le JPanel qui recoit le graphique
-		pnlGraph.setBorder(new TitledBorder(null, "Graphique", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		pnlGraph.setBorder(new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewGraph"),
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		pnlGraph.setBackground(UIManager.getColor("Label.background"));
 		pnlGraph.setBounds(15, 75, 330, 215);
 
@@ -293,13 +251,13 @@ public class ConsoleGUI extends JFrame {
 
 		// D�finit le JPanel des bornes nominales
 		pnlBounds.setBounds(340, 346, 355, 124);
-		pnlBounds.setBorder(new TitledBorder(null, "D\u00E9bord des valeurs nominales", TitledBorder.LEADING,
+		pnlBounds.setBorder(new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewOverflowNominalValues"), TitledBorder.LEADING,
 				TitledBorder.TOP, null, Color.GRAY));
 		pnlBounds.setBackground(UIManager.getColor("Label.background"));
 		pnlBounds.setLayout(null);
 		pane.add(pnlBounds);
 
-		JButton btnDebord = new JButton("D\u00E9bord");
+		JButton btnDebord = new JButton(control.getResourceBundle().getString("consoleGUIViewOverflow"));
 		btnDebord.setBounds(266, 15, 79, 23);
 		pnlBounds.add(btnDebord);
 
@@ -311,11 +269,11 @@ public class ConsoleGUI extends JFrame {
 		slider_1.setBounds(15, 88, 240, 25);
 		pnlBounds.add(slider_1);
 
-		JLabel lblDebordMin = new JLabel("Minimum");
+		JLabel lblDebordMin = new JLabel(control.getResourceBundle().getString("consoleGUIViewMinimum"));
 		lblDebordMin.setBounds(15, 20, 60, 14);
 		pnlBounds.add(lblDebordMin);
 
-		JLabel lblDebordMaximum = new JLabel("Maximum");
+		JLabel lblDebordMaximum = new JLabel(control.getResourceBundle().getString("consoleGUIViewMaximum"));
 		lblDebordMaximum.setBounds(15, 70, 60, 14);
 		pnlBounds.add(lblDebordMaximum);
 
@@ -323,11 +281,11 @@ public class ConsoleGUI extends JFrame {
 		lbAlerte.setIcon(new ImageIcon("img/s_green_button.png"));
 		lbAlerte.setBounds(270, 42, 75, 75);
 		pnlBounds.add(lbAlerte);
-		
-		//Old main func content
-		
+
+		// Old main func content
+
 		this.setLocation(100, 100);
-		control = controller;
+
 		laTable = setTable(controller.getMesures());
 		scrollPane.setViewportView(laTable);
 		setChart();
@@ -347,7 +305,7 @@ public class ConsoleGUI extends JFrame {
 	private JTable setTable(ArrayList<Mesure> mesures) {
 
 		Mesure mesure;
-		
+
 		float min = 0;
 		float max = 0;
 		float moy = 0;
@@ -355,8 +313,6 @@ public class ConsoleGUI extends JFrame {
 		Object[][] dataTable = new Object[mesures.size()][3];
 
 		if (rdbtnCelsius.isSelected()) {
-
-			System.out.println("Celsius : " + rdbtnCelsius.isSelected() + " | " + mesures.size());
 
 			// Initialisation de min et max
 			min = mesures.get(0).getCelsius();
@@ -403,7 +359,9 @@ public class ConsoleGUI extends JFrame {
 			}
 		}
 
-		String[] titreColonnes = { "Zone", "Date-heure", "T�" };
+		String[] titreColonnes = { control.getResourceBundle().getString("consoleGUIViewZone"),
+				control.getResourceBundle().getString("consoleGUIViewDateHour"),
+				control.getResourceBundle().getString("consoleGUIViewTemp") };
 		JTable uneTable = new JTable(dataTable, titreColonnes);
 		// Les donn�es de la JTable ne sont pas modifiables
 		uneTable.setEnabled(false);
@@ -442,7 +400,7 @@ public class ConsoleGUI extends JFrame {
 	public void setChart() {
 
 		Mesure mesure;
-		
+
 		int i1 = 0, i2 = 0, i3 = 0, i4 = 0;
 		DefaultCategoryDataset dataChart = new DefaultCategoryDataset();
 
@@ -494,8 +452,8 @@ public class ConsoleGUI extends JFrame {
 //		System.out.println(dataChart.getRowCount() + " lignes " + dataChart.getColumnCount() + " colonnes");
 
 		JFreeChart chart = ChartFactory.createLineChart(null, // chart title
-				"Heure", // domain axis label
-				"Temp�ratures", // range axis label
+				control.getResourceBundle().getString("consoleGUIViewHours"), // domain axis label
+				control.getResourceBundle().getString("consoleGUIViewTemperature"), // range axis label
 				dataChart, // data
 				PlotOrientation.VERTICAL, // orientation
 				true, // include legend
@@ -506,7 +464,6 @@ public class ConsoleGUI extends JFrame {
 		chartPanel.setBounds(5, 20, 320, 190);
 		chartPanel.setVisible(true);
 		pnlGraph.add(chartPanel);
-		System.out.println("chartPanel added to pnlGraph");
 	}
 
 	/**
