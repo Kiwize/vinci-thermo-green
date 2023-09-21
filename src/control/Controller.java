@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import model.Mesure;
 import utils.FileUtils;
@@ -71,7 +72,10 @@ public class Controller {
 			loginView.setVisible(false);
 			consoleGui.setVisible(true);
 		} else {
-			System.err.println("Invalid username and password !");
+			JOptionPane.showMessageDialog(loginView,
+					getResourceBundle().getString("loginViewInvalidCredentials"),
+					getResourceBundle().getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
+			return;
 		}
 	}
 

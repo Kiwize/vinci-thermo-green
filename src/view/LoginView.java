@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 
 import control.Controller;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class LoginView extends JFrame {
 
@@ -75,7 +76,9 @@ public class LoginView extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (usernameTextField.getText().isEmpty() || passwordTextField.getText().isEmpty()) {
-					System.err.println("Username and password cannot be empty !");
+					JOptionPane.showMessageDialog(e.getComponent(),
+							controller.getResourceBundle().getString("loginViewEmptyCredentials"),
+							controller.getResourceBundle().getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
