@@ -3,14 +3,17 @@
  */
 package control;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.swing.JFrame;
-
 import model.Mesure;
+import model.User;
+import utils.Database;
 import utils.FileUtils;
 import view.ConsoleGUI;
 import view.LoginView;
@@ -42,9 +45,9 @@ public class Controller {
 	
 	//Models
 	private ArrayList<Mesure> mesures = new ArrayList<Mesure>();
+	private User user;
 	
 	public Controller() throws ParseException {
-		
 		this.locale = Locale.getDefault();
 		this.rc = ResourceBundle.getBundle("locale/locale", DEFAULT_LOCALE);
 		
@@ -63,15 +66,25 @@ public class Controller {
 	 * @param password
 	 */
 	public void submitLogins(String username, String password) {
-		String fileData = FileUtils.readTxtFile("data/logins.txt"); //TODO Replace with database access to check credentials
-		String[] credentials = fileData.split("\n");
+		//String fileData = FileUtils.readTxtFile("data/logins.txt"); //TODO Replace with database access to check credentials
 		
-		if(username.equals(credentials[0]) && password.equals(credentials[1])) {
-			System.out.println("Access granted !");
-			loginView.setVisible(false);
-			consoleGui.setVisible(true);
-		} else {
-			System.err.println("Invalid username and password !");
+		try {
+			Database db = new Database();
+			
+			Statement st = db.getCon().createStatement();
+			//TODO Warning SQL Injection
+			ResultSet result = st.executeQuery("SELECT AppUser.id_user FROM AppUser WHERE AppUser.username = '" + username + "' and AppUser.password = '" + password+ "'");
+			
+			if(!result.next()) {
+				System.err.println("Mot de passe ou identifiant invalide !");
+			} else {
+				loginView.setVisible(false);
+				consoleGui.setVisible(true);
+			}
+			
+			db.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -120,5 +133,9 @@ public class Controller {
 	
 	public ResourceBundle getResourceBundle() {
 		return rc;
+	}
+	
+	public User getUser() {
+		return user;
 	}
 }
