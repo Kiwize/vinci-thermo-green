@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.swing.JOptionPane;
+
 import model.Mesure;
 import model.User;
 import utils.Database;
@@ -76,7 +78,9 @@ public class Controller {
 			ResultSet result = st.executeQuery("SELECT AppUser.id_user FROM AppUser WHERE AppUser.username = '" + username + "' and AppUser.password = '" + password+ "'");
 			
 			if(!result.next()) {
-				System.err.println("Mot de passe ou identifiant invalide !");
+				JOptionPane.showMessageDialog(loginView.getComponent(0),
+						this.rc.getString("loginViewInvalidCredentials"),
+						this.rc.getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
 			} else {
 				loginView.setVisible(false);
 				consoleGui.setVisible(true);
