@@ -7,3 +7,5 @@ biblio/*
 .settings
 *.exe
 Thumbs.db
+data/
+doc/
