@@ -3,12 +3,17 @@
  */
 package control;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import model.Mesure;
+import model.User;
+import utils.Database;
 import utils.FileUtils;
 import view.ConsoleGUI;
 import view.LoginView;
