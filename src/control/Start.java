@@ -6,12 +6,13 @@ public class Start {
 	
 	public static void main(String[] args) {
 		try {
-			Controller controller = new Controller();
-			
-			
-			
+			new Start().init();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void init() throws ParseException {
+		Controller controller = new Controller();
 	}
 }

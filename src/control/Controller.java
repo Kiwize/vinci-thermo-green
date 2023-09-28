@@ -15,8 +15,7 @@ import javax.swing.JOptionPane;
 
 import model.Mesure;
 import model.User;
-import utils.Database;
-import utils.FileUtils;
+import utils.DatabaseHelper;
 import view.ConsoleGUI;
 import view.LoginView;
 
@@ -41,6 +40,8 @@ public class Controller {
 	private ResourceBundle rc;
 	private Locale locale;
 	
+	private DatabaseHelper db;
+	
 	//Views
 	private ConsoleGUI consoleGui;
 	private LoginView loginView;
@@ -52,9 +53,22 @@ public class Controller {
 	public Controller() throws ParseException {
 		this.locale = Locale.getDefault();
 		this.rc = ResourceBundle.getBundle("locale/locale", DEFAULT_LOCALE);
-		
-		//TODO Replace CSV data by database
-		FileUtils.lireCSV("data/mesures.csv", mesures);
+
+		//Load mesures from database
+		try {
+			this.db = new DatabaseHelper();
+			
+			Statement st = db.getCon().createStatement();
+			ResultSet set = st.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure;");
+			
+			while(set.next()) {
+				mesures.add(new Mesure(set.getInt("ID_Mesure")));
+			}
+			
+			db.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
 		
 		this.consoleGui = new ConsoleGUI(this);
 		this.loginView = new LoginView(this);
@@ -71,10 +85,9 @@ public class Controller {
 		//String fileData = FileUtils.readTxtFile("data/logins.txt"); //TODO Replace with database access to check credentials
 		
 		try {
-			Database db = new Database();
+			DatabaseHelper db = new DatabaseHelper();
 			
 			Statement st = db.getCon().createStatement();
-			//TODO Warning SQL Injection
 			ResultSet result = st.executeQuery("SELECT AppUser.id_user FROM AppUser WHERE AppUser.username = '" + username + "' and AppUser.password = '" + password+ "'");
 			
 			if(!result.next()) {
@@ -84,6 +97,7 @@ public class Controller {
 			} else {
 				loginView.setVisible(false);
 				consoleGui.setVisible(true);
+				user = new User(result.getInt("id_user"));
 			}
 			
 			db.close();
@@ -108,7 +122,7 @@ public class Controller {
 			if (laZone.compareTo("*") == 0) {
 				laSelection.add(mesure);
 			} else {
-				if (laZone.compareTo(mesure.getNumZone()) == 0) {
+				if (Integer.parseInt(laZone) == (mesure.getNumZone())) {
 					laSelection.add(mesure);
 				}
 			}

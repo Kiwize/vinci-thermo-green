@@ -2,10 +2,13 @@ package utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Database {
+public class DatabaseHelper {
 
 	//TODO Move to env file
 	private String url = "jdbc:mysql://192.168.122.245:3306/thermo_green_demo0";
@@ -14,7 +17,7 @@ public class Database {
 	
 	private Connection con;
 
-	public Database() throws ClassNotFoundException, SQLException {
+	public DatabaseHelper() throws ClassNotFoundException, SQLException {
 		try {
 		    Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e) {

@@ -37,7 +37,7 @@ public class FileUtils {
 
 				// Chaque enregistrement contient des champs
 				String[] fields = null;
-				String numZone = null;
+				int numZone = 0;
 				Date horoDate = null;
 				float fahrenheit;
 
@@ -48,7 +48,7 @@ public class FileUtils {
 
 					// Affecte les champs aux param�tre du constructeur de
 					// mesure
-					numZone = fields[0];
+					numZone = Integer.parseInt(fields[0]);
 					horoDate = strToDate(fields[1]);
 					fahrenheit = Float.parseFloat(fields[2]);
 

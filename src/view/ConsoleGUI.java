@@ -410,19 +410,19 @@ public class ConsoleGUI extends JFrame {
 			mesure = control.getMesures().get(i);
 
 			switch (mesure.getNumZone()) {
-			case "01":
+			case 1:
 				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i1);
 				i1++;
 				break;
-			case "02":
+			case 2:
 				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i2);
 				i2++;
 				break;
-			case "03":
+			case 3:
 				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i3);
 				i3++;
 				break;
-			case "04":
+			case 4:
 				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i4);
 				i4++;
 				break;
