@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 
 import model.Mesure;
+import model.Stadium;
 import model.User;
 import utils.DatabaseHelper;
 import view.ConsoleGUI;
