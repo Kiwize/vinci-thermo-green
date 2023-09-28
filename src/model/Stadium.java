@@ -22,8 +22,8 @@ public class Stadium implements IModel {
 
 			Statement st = database.getCon().createStatement();
 			ResultSet result = st.executeQuery(
-					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user FROM Stadium WHERE Stadium.ID_Stadium = "
-							+ id + ";");
+					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user FROM Stadium WHERE Stadium.ID_Stadium = '"
+							+ id + "';");
 
 			if (!result.next()) {
 				this.id = id;
