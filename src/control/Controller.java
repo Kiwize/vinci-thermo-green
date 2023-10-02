@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import model.Mesure;
 import model.Stadium;
 import model.User;
+import utils.BCrypt;
 import utils.DatabaseHelper;
 import view.ConsoleGUI;
 import view.LoginView;
@@ -98,17 +99,24 @@ public class Controller {
 			DatabaseHelper db = new DatabaseHelper();
 
 			Statement st = db.getCon().createStatement();
-			ResultSet result = st.executeQuery("SELECT AppUser.id_user FROM AppUser WHERE AppUser.username = '"
-					+ username + "' and AppUser.password = '" + password + "'");
+			ResultSet result = st
+					.executeQuery("SELECT AppUser.id_user, AppUser.Password FROM AppUser WHERE AppUser.username = '"
+							+ username + "'");
 
 			if (!result.next()) {
 				JOptionPane.showMessageDialog(loginView.getComponent(0),
 						this.rc.getString("loginViewInvalidCredentials"), this.rc.getString("loginViewError"),
 						JOptionPane.ERROR_MESSAGE);
 			} else {
-				loginView.setVisible(false);
-				consoleGui.setVisible(true);
-				user = new User(result.getInt("id_user"));
+				if (BCrypt.checkpw(password, result.getString("Password"))) {
+					loginView.setVisible(false);
+					consoleGui.setVisible(true);
+					user = new User(result.getInt("id_user"));
+				} else {
+					JOptionPane.showMessageDialog(loginView.getComponent(0),
+							this.rc.getString("loginViewInvalidCredentials"), this.rc.getString("loginViewError"),
+							JOptionPane.ERROR_MESSAGE);
+				}
 			}
 
 			db.close();
@@ -116,16 +124,16 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public ArrayList<Stadium> getUserStadiums() {
 		ArrayList<Stadium> sts = new ArrayList<>();
-		
-		for(Stadium st : stadiums) {
-			if(st.getUserID() == user.getId()) {
+
+		for (Stadium st : stadiums) {
+			if (st.getUserID() == user.getId()) {
 				sts.add(st);
 			}
 		}
-		
+
 		return sts;
 	}
 
