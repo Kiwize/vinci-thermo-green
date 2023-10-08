@@ -1,37 +1,61 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+
+import control.Config;
 
 public class DatabaseHelper {
 
-	//TODO Move to env file
-	private String url = "jdbc:mysql://192.168.122.245:3306/thermo_green_demo0";
-	private String username = "_gateway";
-	private String password = "dev";
-	
+	private String url = "";
+	private String username = "";
+	private String password = "";
+
 	private Connection con;
 
 	public DatabaseHelper() throws ClassNotFoundException, SQLException {
 		try {
-		    Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
-		
+
+		BufferedReader reader;
+		String cdx = "";
+
+		try {
+			reader = new BufferedReader(new FileReader(Config.DBENVFILEPATH));
+			String line = reader.readLine();
+
+			while (line != null) {
+				cdx += line + ";";
+				line = reader.readLine();
+			}
+
+			reader.close();
+		} catch (IOException e) {
+			System.err.println("Database configuration file '" + Config.DBENVFILEPATH + "' is missing !");
+			System.exit(-1);
+		}
+
+		String[] arrc = cdx.split(";");
+
+		url = arrc[0];
+		username = arrc[1];
+		password = arrc[2];
+
 		this.con = DriverManager.getConnection(url, username, password);
 	}
-	
+
 	public Connection getCon() {
 		return con;
 	}
-	
-	public void close()  {
+
+	public void close() {
 		try {
 			this.con.close();
 		} catch (SQLException e) {
