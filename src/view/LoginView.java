@@ -25,6 +25,7 @@ public class LoginView extends JFrame {
 		this.controller = controller;
 
 		setTitle(controller.getResourceBundle().getString("loginViewWindowTitle"));
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setResizable(false);
 
 		JPanel panel = new JPanel();

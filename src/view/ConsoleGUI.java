@@ -28,6 +28,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -37,6 +38,11 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import control.Controller;
 import model.Mesure;
+import model.Stadium;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 /**
  * ConsoleGUI : IHM de l'application de consultation des temp�ratures Projet
@@ -71,6 +77,10 @@ public class ConsoleGUI extends JFrame {
 
 	private JScrollPane scrollPane = new JScrollPane();
 
+	private DefaultCategoryDataset dataChart = new DefaultCategoryDataset();
+	private JFreeChart chart;
+	private Stadium currentStadium;
+
 	/**
 	 * <p>
 	 * Container interm�diaire JPanel
@@ -82,6 +92,8 @@ public class ConsoleGUI extends JFrame {
 	 * @see JPanel
 	 */
 	JPanel pnlBounds = new JPanel();
+	private JTextField lblOverflowMin;
+	private JTextField lblOverflowMax;
 
 	public ConsoleGUI(Controller controller) throws ParseException {
 
@@ -251,42 +263,73 @@ public class ConsoleGUI extends JFrame {
 
 		// D�finit le JPanel des bornes nominales
 		pnlBounds.setBounds(340, 346, 355, 124);
-		pnlBounds.setBorder(new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewOverflowNominalValues"), TitledBorder.LEADING,
-				TitledBorder.TOP, null, Color.GRAY));
+		pnlBounds.setBorder(
+				new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewOverflowNominalValues"),
+						TitledBorder.LEADING, TitledBorder.TOP, null, Color.GRAY));
 		pnlBounds.setBackground(UIManager.getColor("Label.background"));
 		pnlBounds.setLayout(null);
 		pane.add(pnlBounds);
 
 		JButton btnDebord = new JButton(control.getResourceBundle().getString("consoleGUIViewOverflow"));
+		btnDebord.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				controller.updateOverflowStatus();
+			}
+		});
 		btnDebord.setBounds(266, 15, 79, 23);
 		pnlBounds.add(btnDebord);
+		
 
-		JSlider slider = new JSlider();
-		slider.setBounds(16, 40, 240, 25);
-		pnlBounds.add(slider);
-
-		JSlider slider_1 = new JSlider();
-		slider_1.setBounds(15, 88, 240, 25);
-		pnlBounds.add(slider_1);
+		JSlider overflowSliderMin = new JSlider();
+		overflowSliderMin.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent c) {
+				controller.setOverflowMin(((JSlider) c.getSource()).getValue());
+			}
+		});
+		overflowSliderMin.setBounds(16, 40, 240, 25);
+		pnlBounds.add(overflowSliderMin);
+		
+		JSlider overflowSliderMax = new JSlider();
+		overflowSliderMax.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent c) {
+				controller.setOverflowMax(((JSlider) c.getSource()).getValue());
+			}
+		});
+		
+		overflowSliderMax.setBounds(15, 88, 240, 25);
+		pnlBounds.add(overflowSliderMax);
 
 		JLabel lblDebordMin = new JLabel(control.getResourceBundle().getString("consoleGUIViewMinimum"));
-		lblDebordMin.setBounds(15, 20, 60, 14);
+		lblDebordMin.setBounds(15, 20, 79, 14);
 		pnlBounds.add(lblDebordMin);
 
 		JLabel lblDebordMaximum = new JLabel(control.getResourceBundle().getString("consoleGUIViewMaximum"));
-		lblDebordMaximum.setBounds(15, 70, 60, 14);
+		lblDebordMaximum.setBounds(15, 70, 79, 14);
 		pnlBounds.add(lblDebordMaximum);
 
 		JLabel lbAlerte = new JLabel();
 		lbAlerte.setIcon(new ImageIcon("img/s_green_button.png"));
 		lbAlerte.setBounds(270, 42, 75, 75);
 		pnlBounds.add(lbAlerte);
-
-		// Old main func content
+		
+		lblOverflowMin = new JTextField();
+		lblOverflowMin.setBounds(91, 16, 114, 21);
+		pnlBounds.add(lblOverflowMin);
+		lblOverflowMin.setColumns(10);
+		
+		lblOverflowMax = new JTextField();
+		lblOverflowMax.setBounds(91, 67, 114, 21);
+		pnlBounds.add(lblOverflowMax);
+		lblOverflowMax.setColumns(10);
 
 		this.setLocation(100, 100);
+	}
 
-		laTable = setTable(controller.getMesures());
+	public void updateTable() {
+		control.setMesures(Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID()));
+		laTable = setTable(Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID()));
+		scrollPane.remove(laTable);
 		scrollPane.setViewportView(laTable);
 		setChart();
 	}
@@ -311,6 +354,11 @@ public class ConsoleGUI extends JFrame {
 		float moy = 0;
 		DecimalFormat round = new DecimalFormat("0.##");
 		Object[][] dataTable = new Object[mesures.size()][3];
+		
+		//laTable.setModel(new DefaultTableModel());
+		
+		if(mesures.isEmpty())
+			return this.laTable;
 
 		if (rdbtnCelsius.isSelected()) {
 
@@ -400,14 +448,14 @@ public class ConsoleGUI extends JFrame {
 	public void setChart() {
 
 		Mesure mesure;
+		ArrayList<Mesure> mesures = Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID());
 
 		int i1 = 0, i2 = 0, i3 = 0, i4 = 0;
-		DefaultCategoryDataset dataChart = new DefaultCategoryDataset();
 
 		// Set data ((Number)temp,zone,dateHeure)
-		for (int i = 0; i < control.getMesures().size(); i++) {
+		for (int i = 0; i < mesures.size(); i++) {
 
-			mesure = control.getMesures().get(i);
+			mesure = mesures.get(i);
 
 			switch (mesure.getNumZone()) {
 			case 1:
@@ -431,27 +479,7 @@ public class ConsoleGUI extends JFrame {
 			}
 		}
 
-		// un bouchon pour tester
-		// Set data ((Number)temp,zone,dateHeure)
-//        dataChart.addValue((Number)1.0, "01", 1);
-//        dataChart.addValue((Number)5.0, "02", 1);
-//        dataChart.addValue((Number)4.0, "01", 2);
-//        dataChart.addValue((Number)7.0, "02", 2);
-//        dataChart.addValue((Number)3.0, "01", 3);
-//        dataChart.addValue((Number)6.0, "02", 3);
-//        dataChart.addValue((Number)5.0, "01", 4);
-//        dataChart.addValue((Number)8.0, "02", 4);
-//        dataChart.addValue((Number)5.0, "01", 5);
-//        dataChart.addValue((Number)4.0, "02", 5);
-//        dataChart.addValue((Number)7.0, "01", 6);
-//        dataChart.addValue((Number)4.0, "02", 6);
-//        dataChart.addValue((Number)7.0, "01", 7);
-//        dataChart.addValue((Number)2.0, "02", 7);
-//        dataChart.addValue((Number)8.0, "01", 8);
-//        dataChart.addValue((Number)1.0, "02", 8);
-//		System.out.println(dataChart.getRowCount() + " lignes " + dataChart.getColumnCount() + " colonnes");
-
-		JFreeChart chart = ChartFactory.createLineChart(null, // chart title
+		chart = ChartFactory.createLineChart(null, // chart title
 				control.getResourceBundle().getString("consoleGUIViewHours"), // domain axis label
 				control.getResourceBundle().getString("consoleGUIViewTemperature"), // range axis label
 				dataChart, // data
@@ -460,10 +488,47 @@ public class ConsoleGUI extends JFrame {
 				true, // tooltips
 				false // urls
 		);
+		
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBounds(5, 20, 320, 190);
 		chartPanel.setVisible(true);
 		pnlGraph.add(chartPanel);
+	}
+
+	public void updateGraph() {
+		Mesure mesure;
+		ArrayList<Mesure> mesures = Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID());
+		dataChart.clear();
+		int i1 = 0, i2 = 0, i3 = 0, i4 = 0;
+
+		// Set data ((Number)temp,zone,dateHeure)
+		for (int i = 0; i < mesures.size(); i++) {
+			mesure = mesures.get(i);
+
+			switch (mesure.getNumZone()) {
+			case 1:
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i1);
+				i1++;
+				break;
+			case 2:
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i2);
+				i2++;
+				break;
+			case 3:
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i3);
+				i3++;
+				break;
+			case 4:
+				dataChart.addValue((Number) mesure.getCelsius(), mesure.getNumZone(), i4);
+				i4++;
+				break;
+			default:
+				break;
+			}
+		}
+
+		chart.getCategoryPlot().setDataset(dataChart);
+		chart.fireChartChanged();
 	}
 
 	/**
@@ -475,11 +540,11 @@ public class ConsoleGUI extends JFrame {
 	class filtrerData implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 
+			control.setMesures(Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID()));
+			
 			control.setMesures(control.filtrerLesMesure(choixZone.getSelectedItem().toString()));
-			System.out.println(
-					"Filtrer Celsius : " + rdbtnCelsius.isSelected() + " Fahrenheit : " + rdbtnFahrenheit.isSelected()
-							+ " choix : " + choixZone.getSelectedItem() + " d�but : " + startDate.getText());
 			displayLesMesures(control.getMesures());
+			updateGraph();
 
 			// Construit le tableau d'objet
 			laTable = setTable(control.getMesures());
@@ -500,5 +565,13 @@ public class ConsoleGUI extends JFrame {
 			System.out.println(i + " " + uneCollection.get(i).getNumZone() + " | " + uneCollection.get(i).getHoroDate()
 					+ " | " + uneCollection.get(i).getCelsius());
 		}
+	}
+
+	public void setCurrentStadium(Stadium currentStadium) {
+		this.currentStadium = currentStadium;
+	}
+
+	public Stadium getCurrentStadium() {
+		return currentStadium;
 	}
 }

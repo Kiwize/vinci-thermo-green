@@ -73,8 +73,8 @@ public class Mesure implements IModel {
 				this.id = id;
 				this.numZone = -1;
 				this.fahrenheit = -255.0f;
-				this.horoDate = new Date();
-				this.IDStadium = "STD01";
+				this.horoDate = null;
+				this.IDStadium = "";
 			} else {
 				this.id = id;
 				this.numZone = result.getInt("num_zone");
@@ -102,12 +102,34 @@ public class Mesure implements IModel {
 		this.fahrenheit = pFahrenheit;
 		this.IDStadium = "STD01";
 	}
-	
+
 	public Mesure(int pZone, Date pDate, float pFahrenheit, String stadeID) {
 		this.numZone = pZone;
 		this.horoDate = pDate;
 		this.fahrenheit = pFahrenheit;
 		this.IDStadium = stadeID;
+	}
+
+	public static ArrayList<Mesure> getMesuresFromStadiumID(String ID) {
+		try {
+			DatabaseHelper db = new DatabaseHelper();
+			ArrayList<Mesure> mesures = new ArrayList<>();
+			Statement st = db.getCon().createStatement();
+
+			ResultSet set = st
+					.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure WHERE Mesure.ID_Stadium = '" + ID + "'");
+
+			while (set.next()) {
+				mesures.add(new Mesure(set.getInt("ID_Mesure")));
+			}
+			db.close();
+
+			return mesures;
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	public String getIDStadium() {
@@ -160,7 +182,7 @@ public class Mesure implements IModel {
 		try {
 			DatabaseHelper database = new DatabaseHelper();
 			Statement st = database.getCon().createStatement();
-			
+
 			boolean res = st.execute("UPDATE Mesure SET Mesure.num_zone = '" + this.numZone + "', Mesure.Date_mesure='"
 					+ this.horoDate + "', Mesure.Temp='" + this.fahrenheit + "', Mesure.ID_Stadium='" + this.IDStadium
 					+ "' where Mesure.ID_Mesure = " + this.id + ";");
@@ -179,11 +201,10 @@ public class Mesure implements IModel {
 		try {
 			DatabaseHelper database = new DatabaseHelper();
 
-			//Format date if needed
+			// Format date if needed
 			DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
 			Statement st = database.getCon().createStatement();
-			
-			
+
 			boolean res = st.execute(
 					"INSERT INTO Mesure (num_zone, Date_mesure, Temp, ID_Stadium) VALUES ('" + this.numZone + "','"
 							+ format.format(this.horoDate) + "','" + this.fahrenheit + "','" + this.IDStadium + "')");
@@ -196,5 +217,5 @@ public class Mesure implements IModel {
 			return false;
 		}
 	}
-	
+
 }

@@ -9,5 +9,6 @@ biblio/*
 Thumbs.db
 .idea/*
 bin/
-data/
-doc/
+data/*
+img/*
+doc/*
