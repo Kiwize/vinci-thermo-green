@@ -9,6 +9,10 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -28,7 +32,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -39,10 +44,6 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import control.Controller;
 import model.Mesure;
 import model.Stadium;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 /**
  * ConsoleGUI : IHM de l'application de consultation des temp�ratures Projet
@@ -324,6 +325,13 @@ public class ConsoleGUI extends JFrame {
 		lblOverflowMax.setColumns(10);
 
 		this.setLocation(100, 100);
+		
+		addWindowListener(new WindowAdapter() {
+			@Override
+            public void windowClosing(WindowEvent evt){
+            	controller.quit();
+            }
+        });
 	}
 
 	public void updateTable() {

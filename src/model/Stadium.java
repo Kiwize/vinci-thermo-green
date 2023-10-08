@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import control.Controller;
 import utils.DatabaseHelper;
 
 public class Stadium implements IModel {
@@ -18,9 +19,7 @@ public class Stadium implements IModel {
 
 	public Stadium(String id) {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 			ResultSet result = st.executeQuery(
 					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user FROM Stadium WHERE Stadium.ID_Stadium = '"
 							+ id + "';");
@@ -35,8 +34,7 @@ public class Stadium implements IModel {
 				this.id_user = result.getInt("id_user");
 			}
 
-			database.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -50,16 +48,14 @@ public class Stadium implements IModel {
 	@Override
 	public boolean save() {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 
 			boolean res = st.execute("UPDATE Stadium SET Stadium.nom_stade='" + this.name + "', Stadium.id_user='"
 					+ this.id_user + "'" + "' where Stadium.ID_Stadium = " + this.id + ";");
 
-			database.close();
 			return res;
 
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -68,16 +64,13 @@ public class Stadium implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-			Statement st = database.getCon().createStatement();
-
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 			boolean res = st.execute("INSERT INTO Stadium (ID_Stadium, nom_stade, id_user) VALUES ('" + this.id + "', '"
 					+ this.name + "','" + this.id_user + "')");
 
-			database.close();
 			return res;
 
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}

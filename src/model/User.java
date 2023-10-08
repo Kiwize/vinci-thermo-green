@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import control.Controller;
 import utils.DatabaseHelper;
 
 public class User implements IModel{
@@ -14,9 +15,7 @@ public class User implements IModel{
 
 	public User(int id) {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 			ResultSet result = st.executeQuery(
 					"SELECT AppUser.username, AppUser.password FROM AppUser WHERE AppUser.id_user = " + id + ";");
 
@@ -29,9 +28,7 @@ public class User implements IModel{
 				this.name = result.getString("username");
 				this.password = result.getString("password");
 			}
-
-			database.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -44,16 +41,13 @@ public class User implements IModel{
 
 	public boolean save() {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 			boolean res =  st.execute("UPDATE AppUser SET AppUser.username = '" + this.name + "', AppUser.password = '"
 					+ this.password + "' where AppUser.id_user = " + this.id + ";");
 
-			database.close();
 			return res;
 			
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}

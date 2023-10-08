@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -41,6 +40,7 @@ import view.StadiumManagerView;
 public class Controller {
 
 	public static final Locale DEFAULT_LOCALE = Locale.US;
+	public static Controller INSTANCE;
 
 	private ResourceBundle rc;
 	private Locale locale;
@@ -59,7 +59,7 @@ public class Controller {
 	private ArrayList<Mesure> mesures = new ArrayList<>();
 	private ArrayList<Stadium> stadiums = new ArrayList<>();
 	private User user;
-
+	
 	public Controller() throws ParseException {
 		this.locale = Locale.getDefault();
 		this.rc = ResourceBundle.getBundle("locale/locale", DEFAULT_LOCALE);
@@ -67,6 +67,7 @@ public class Controller {
 		// Load mesures from database
 		try {
 			this.db = new DatabaseHelper();
+			Controller.INSTANCE = this;
 
 			Statement st = db.getCon().createStatement();
 			ResultSet set = st.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure;");
@@ -80,10 +81,6 @@ public class Controller {
 			while (set.next()) {
 				stadiums.add(new Stadium(set.getString("ID_Stadium")));
 			}
-			
-			
-
-			db.close();
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
@@ -91,6 +88,8 @@ public class Controller {
 		this.consoleGui = new ConsoleGUI(this);
 		this.loginView = new LoginView(this);
 		loginView.setVisible(true);
+		
+		
 	}
 
 	/**
@@ -104,8 +103,6 @@ public class Controller {
 		// with database access to check credentials
 
 		try {
-			DatabaseHelper db = new DatabaseHelper();
-
 			Statement st = db.getCon().createStatement();
 			ResultSet result = st
 					.executeQuery("SELECT AppUser.id_user, AppUser.Password FROM AppUser WHERE AppUser.username = '"
@@ -136,8 +133,7 @@ public class Controller {
 							JOptionPane.ERROR_MESSAGE);
 				}
 			}
-			db.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -202,6 +198,11 @@ public class Controller {
 			}
 		}
 	}
+	
+	public void quit() {
+		db.close();
+		smv.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
+	}
 
 	/**
 	 * <p>
@@ -228,6 +229,10 @@ public class Controller {
 
 	public User getUser() {
 		return user;
+	}
+	
+	public DatabaseHelper getDB() {
+		return db;
 	}
 	
 	public float getOverflowMax() {

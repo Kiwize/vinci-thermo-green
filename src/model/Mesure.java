@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import control.Controller;
 import utils.DatabaseHelper;
 
 /**
@@ -62,9 +63,7 @@ public class Mesure implements IModel {
 
 	public Mesure(int id) {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 			ResultSet result = st.executeQuery(
 					"SELECT Mesure.num_zone, Mesure.Temp, Mesure.Date_mesure, Mesure.ID_Stadium FROM Mesure WHERE Mesure.ID_mesure = "
 							+ id + ";");
@@ -83,8 +82,7 @@ public class Mesure implements IModel {
 				this.IDStadium = result.getString("ID_Stadium");
 			}
 
-			database.close();
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -112,9 +110,8 @@ public class Mesure implements IModel {
 
 	public static ArrayList<Mesure> getMesuresFromStadiumID(String ID) {
 		try {
-			DatabaseHelper db = new DatabaseHelper();
 			ArrayList<Mesure> mesures = new ArrayList<>();
-			Statement st = db.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 
 			ResultSet set = st
 					.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure WHERE Mesure.ID_Stadium = '" + ID + "'");
@@ -122,10 +119,8 @@ public class Mesure implements IModel {
 			while (set.next()) {
 				mesures.add(new Mesure(set.getInt("ID_Mesure")));
 			}
-			db.close();
-
 			return mesures;
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -180,17 +175,15 @@ public class Mesure implements IModel {
 	@Override
 	public boolean save() {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 
 			boolean res = st.execute("UPDATE Mesure SET Mesure.num_zone = '" + this.numZone + "', Mesure.Date_mesure='"
 					+ this.horoDate + "', Mesure.Temp='" + this.fahrenheit + "', Mesure.ID_Stadium='" + this.IDStadium
 					+ "' where Mesure.ID_Mesure = " + this.id + ";");
 
-			database.close();
 			return res;
 
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -199,20 +192,18 @@ public class Mesure implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-			DatabaseHelper database = new DatabaseHelper();
 
 			// Format date if needed
 			DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
-			Statement st = database.getCon().createStatement();
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
 
 			boolean res = st.execute(
 					"INSERT INTO Mesure (num_zone, Date_mesure, Temp, ID_Stadium) VALUES ('" + this.numZone + "','"
 							+ format.format(this.horoDate) + "','" + this.fahrenheit + "','" + this.IDStadium + "')");
 
-			database.close();
 			return res;
 
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
