@@ -30,7 +30,6 @@ public class Start {
 	 * @return
 	 */
 	public EError chkBoot() {
-		
 		//Database verification
 		File file = new File(Config.DBENVFILEPATH);
 		if(!file.exists()) return EError.MISSING_INVALID_CONFIG;
@@ -41,8 +40,6 @@ public class Start {
 		} catch (ClassNotFoundException | SQLException e) {
 			return EError.UNREACHABLE_DATABASE;
 		}
-		
-		
 		
 		return EError.NO_ERROR;
 	}

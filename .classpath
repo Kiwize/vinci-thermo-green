@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="lib/jcommon-1.0.23/jcommon-1.0.23.jar"/>
 	<classpathentry kind="lib" path="lib/jfreechart-1.0.19/lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-j-8.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/passay-1.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/passay-1.6.4-javadoc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

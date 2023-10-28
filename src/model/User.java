@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import control.Controller;
-import utils.DatabaseHelper;
+import utils.BCrypt;
 
-public class User implements IModel{
+public class User implements IModel {
 
 	private int id;
 	private String name;
@@ -42,11 +42,11 @@ public class User implements IModel{
 	public boolean save() {
 		try {
 			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-			boolean res =  st.execute("UPDATE AppUser SET AppUser.username = '" + this.name + "', AppUser.password = '"
+			boolean res = st.execute("UPDATE AppUser SET AppUser.username = '" + this.name + "', AppUser.password = '"
 					+ this.password + "' where AppUser.id_user = " + this.id + ";");
 
 			return res;
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -64,13 +64,28 @@ public class User implements IModel{
 	public int getId() {
 		return id;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public boolean updatePassword(String newPassword) {
+		String encrypted = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+		try {
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
+
+			st.execute("UPDATE AppUser SET AppUser.Password = '" + encrypted
+					+ "' WHERE AppUser.id_user = " + this.id + ";");
+
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override

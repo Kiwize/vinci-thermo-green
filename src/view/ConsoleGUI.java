@@ -9,27 +9,18 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -41,9 +32,19 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import control.Config;
 import control.Controller;
 import model.Mesure;
 import model.Stadium;
+import view.component.ButtonRound;
+import view.component.CheckBox;
+import view.component.ComboBox;
+import view.component.Label;
+import view.component.Panel;
+import view.component.RadioButton;
+import view.component.ScrollPane;
+import view.component.Slider;
+import view.component.TextField;
 
 /**
  * ConsoleGUI : IHM de l'application de consultation des temp�ratures Projet
@@ -56,31 +57,44 @@ import model.Stadium;
  */
 public class ConsoleGUI extends JFrame {
 
+	private static final long serialVersionUID = 5227009063967157518L;
+	
 	private Controller control;
-	private JPanel criteriaPanel = new JPanel();
+	private Panel criteriaPanel = new Panel();
 
-	private JRadioButton rdbtnCelsius;
-	private JRadioButton rdbtnFahrenheit;
+	private RadioButton rdbtnCelsius;
+	private RadioButton rdbtnFahrenheit;
 
-	private JComboBox<String> choixZone = new JComboBox<String>();
-	private JTextField startDate;
-	private JTextField dateFin;
-	private JButton btnFiltrer;
+	private ComboBox<String> zoneDropdown = new ComboBox<String>();
+	private TextField startDate;
+	private TextField dateFin;
 
-	private JPanel pnlParam = new JPanel();
-	private JPanel pnlGraph = new JPanel();
+	private Panel pnlParam = new Panel();
+	private Panel pnlGraph = new Panel();
 
-	private JTextField tempMin;
-	private JTextField tempMoy;
-	private JTextField tempMax;
+	private TextField tempMin;
+	private TextField tempMoy;
+	private TextField tempMax;
+
+	private Label selectedStadiumNameLabel;
+	private Label alertLabel;
+
+	private ComboBox<String> availableStadiumDropdown;
 
 	private JTable laTable;
 
-	private JScrollPane scrollPane = new JScrollPane();
+	private ScrollPane scrollPane = new ScrollPane();
+	
+	Slider overflowSliderMin;
+	Slider overflowSliderMax;	
 
 	private DefaultCategoryDataset dataChart = new DefaultCategoryDataset();
 	private JFreeChart chart;
 	private Stadium currentStadium;
+
+	private boolean isReady;
+
+	private HashMap<String, Stadium> loadedStadiums;
 
 	/**
 	 * <p>
@@ -92,21 +106,34 @@ public class ConsoleGUI extends JFrame {
 	 * 
 	 * @see JPanel
 	 */
-	JPanel pnlBounds = new JPanel();
-	private JTextField lblOverflowMin;
-	private JTextField lblOverflowMax;
+	Panel pnlBounds = new Panel();
+	private TextField lblOverflowMin;
+	private TextField lblOverflowMax;
 
 	public ConsoleGUI(Controller controller) throws ParseException {
 
 		this.control = controller;
+		this.getContentPane().setBackground(Config.SECONDARY_COLOR);
 
-		rdbtnCelsius = new JRadioButton(control.getResourceBundle().getString("consoleGUIViewCelsius"));
-		rdbtnFahrenheit = new JRadioButton(control.getResourceBundle().getString("consoleGUIViewFarhenheit"));
-		btnFiltrer = new JButton(control.getResourceBundle().getString("consoleGUIViewFilter"));
+		rdbtnCelsius = new RadioButton(control.getResourceBundle().getString("consoleGUIViewCelsius"));
+		rdbtnCelsius.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				filter();
+			}
+		});
+		rdbtnFahrenheit = new RadioButton(control.getResourceBundle().getString("consoleGUIViewFarhenheit"));
+		rdbtnFahrenheit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				filter();
+			}
+		});
+
+		loadedStadiums = new HashMap<>();
+		isReady = false;
 
 		setIconImage(Toolkit.getDefaultToolkit().getImage("img/vinci_ico.jpg"));
 		setTitle(control.getResourceBundle().getString("consoleGUIViewWindowTitle"));
-		setSize(712, 510);
+		setSize(712, 560);
 		setResizable(false);
 		setFont(new Font("Consolas", Font.PLAIN, 12));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -117,10 +144,9 @@ public class ConsoleGUI extends JFrame {
 		getContentPane().setLayout(null);
 
 		// D�finit le JPanel des crit�res
-		criteriaPanel.setBounds(10, 10, 325, 145);
+		criteriaPanel.setBounds(12, 56, 325, 145);
 		criteriaPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Filtrage",
 				TitledBorder.LEADING, TitledBorder.TOP, null, Color.GRAY));
-		criteriaPanel.setBackground(UIManager.getColor("Label.background"));
 		criteriaPanel.setLayout(null);
 		pane.add(criteriaPanel);
 
@@ -136,117 +162,112 @@ public class ConsoleGUI extends JFrame {
 		rdbtnFahrenheit.setBounds(115, 20, 100, 23);
 		criteriaPanel.add(rdbtnFahrenheit);
 
-		// Groupe les boutons radio.
 		ButtonGroup group = new ButtonGroup();
 		group.add(rdbtnCelsius);
 		group.add(rdbtnFahrenheit);
+		zoneDropdown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (isReady)
+					filter();
+			}
+		});
 
-		choixZone.setBounds(115, 50, 100, 20);
-		criteriaPanel.add(choixZone);
+		zoneDropdown.setBounds(115, 50, 100, 20);
+		criteriaPanel.add(zoneDropdown);
 
-		// un bouchon "Quick & Dirty" pour peupler la liste d�roulante
-		// TODO peupler la liste avec un �quivalent � SELECT DISTINCT
-		// TODO impl�menter la classe m�tier Zone pour peupler une JComboBox<Zone>
-		choixZone.addItem("*");
-		choixZone.addItem("01");
-		choixZone.addItem("02");
-		choixZone.addItem("03");
-		choixZone.addItem("04");
-
-		JLabel zoneLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewZone"));
+		Label zoneLabel = new Label(control.getResourceBundle().getString("consoleGUIViewZone"));
 		zoneLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		zoneLabel.setBounds(15, 54, 99, 14);
 		criteriaPanel.add(zoneLabel);
 
-		JLabel startLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewFrom"));
+		Label startLabel = new Label(control.getResourceBundle().getString("consoleGUIViewFrom"));
 		startLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		startLabel.setBounds(15, 83, 46, 14);
 		criteriaPanel.add(startLabel);
 
-		startDate = new JTextField();
+		startDate = new TextField();
 		startDate.setBounds(115, 79, 100, 20);
 		criteriaPanel.add(startDate);
 		startDate.setColumns(10);
 
-		JLabel endLabel = new JLabel(control.getResourceBundle().getString("consoleGUIViewTo"));
+		Label endLabel = new Label(control.getResourceBundle().getString("consoleGUIViewTo"));
 		endLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		endLabel.setBounds(15, 114, 46, 14);
 		criteriaPanel.add(endLabel);
 
-		dateFin = new JTextField();
+		dateFin = new TextField();
 		dateFin.setColumns(10);
 		dateFin.setBounds(115, 110, 100, 20);
 		criteriaPanel.add(dateFin);
 
-		btnFiltrer.setBounds(225, 109, 89, 23);
-		criteriaPanel.add(btnFiltrer);
-		btnFiltrer.addActionListener(new filtrerData());
-
-		JLabel vinciLogoLabel = new JLabel();
+		Label vinciLogoLabel = new Label("");
 		vinciLogoLabel.setIcon(new ImageIcon("img/s_vinci.png"));
 		vinciLogoLabel.setBounds(221, 11, 95, 35);
 		criteriaPanel.add(vinciLogoLabel);
 
 		// D�finit le JScrollPane qui re�oit la JTable
-		scrollPane.setBounds(10, 160, 325, 310);
+		scrollPane.setBounds(12, 206, 325, 310);
 		pane.add(scrollPane);
 
 		// D�finit le JPanel des param�tres du graphique
-		pnlParam.setBounds(340, 10, 355, 335);
+		pnlParam.setBounds(342, 56, 355, 335);
 		pnlParam.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
 				control.getResourceBundle().getString("consoleGUIViewGraphTemp"), TitledBorder.LEADING,
 				TitledBorder.TOP, null, new Color(128, 128, 128)));
-		pnlParam.setBackground(UIManager.getColor("Label.background"));
 		pnlParam.setLayout(null);
 		pane.add(pnlParam);
 
-		JCheckBox chckbxDistinctZone = new JCheckBox(
+		CheckBox chckbxDistinctZone = new CheckBox(
 				control.getResourceBundle().getString("consoleGUIViewDistinguishZones"));
+		chckbxDistinctZone.setEnabled(false);
 		chckbxDistinctZone.setFont(new Font("Consolas", Font.PLAIN, 12));
 		chckbxDistinctZone.setBounds(15, 20, 165, 23);
 		pnlParam.add(chckbxDistinctZone);
 
-		JLabel lblTypeDeGraphique = new JLabel(control.getResourceBundle().getString("consoleGUIViewGraphType"));
+		Label lblTypeDeGraphique = new Label(control.getResourceBundle().getString("consoleGUIViewGraphType"));
 		lblTypeDeGraphique.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblTypeDeGraphique.setBounds(15, 50, 120, 14);
 		pnlParam.add(lblTypeDeGraphique);
 
-		JComboBox choixGraphique = new JComboBox();
+		ComboBox<String> choixGraphique = new ComboBox<>();
+		choixGraphique.setEnabled(false);
 		choixGraphique.setBounds(152, 47, 190, 20);
 		pnlParam.add(choixGraphique);
 
-		JButton refreshButton = new JButton(control.getResourceBundle().getString("consoleGUIViewRefresh"));
-		refreshButton.setBounds(222, 19, 120, 23);
+		ButtonRound refreshButton = new ButtonRound(control.getResourceBundle().getString("consoleGUIViewRefresh"), 222,
+				19);
+		refreshButton.setBounds(222, 19, 120, 24);
+		refreshButton.setEnabled(false);
 		pnlParam.add(refreshButton);
 
-		JLabel lblMin = new JLabel(control.getResourceBundle().getString("consoleGUIViewMin"));
+		Label lblMin = new Label(control.getResourceBundle().getString("consoleGUIViewMin"));
 		lblMin.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMin.setBounds(15, 306, 30, 14);
 		pnlParam.add(lblMin);
 
-		tempMin = new JTextField();
+		tempMin = new TextField();
 		tempMin.setEditable(false);
 		tempMin.setBounds(55, 302, 50, 20);
 		pnlParam.add(tempMin);
 		tempMin.setColumns(10);
 
-		JLabel lblMoy = new JLabel(control.getResourceBundle().getString("consoleGUIViewAvg"));
+		Label lblMoy = new Label(control.getResourceBundle().getString("consoleGUIViewAvg"));
 		lblMoy.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMoy.setBounds(137, 304, 30, 14);
 		pnlParam.add(lblMoy);
 
-		tempMoy = new JTextField();
+		tempMoy = new TextField();
 		tempMoy.setEditable(false);
 		tempMoy.setColumns(10);
 		tempMoy.setBounds(177, 300, 50, 20);
 		pnlParam.add(tempMoy);
 
-		JLabel lblMax = new JLabel(control.getResourceBundle().getString("consoleGUIViewMax"));
+		Label lblMax = new Label(control.getResourceBundle().getString("consoleGUIViewMax"));
 		lblMax.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMax.setBounds(252, 304, 30, 14);
 		pnlParam.add(lblMax);
 
-		tempMax = new JTextField();
+		tempMax = new TextField();
 		tempMax.setEditable(false);
 		tempMax.setColumns(10);
 		tempMax.setBounds(292, 300, 50, 20);
@@ -255,7 +276,6 @@ public class ConsoleGUI extends JFrame {
 		// D�finit le JPanel qui recoit le graphique
 		pnlGraph.setBorder(new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewGraph"),
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		pnlGraph.setBackground(UIManager.getColor("Label.background"));
 		pnlGraph.setBounds(15, 75, 330, 215);
 
 		// pose le pnlGraph dans le pnlParam
@@ -263,75 +283,92 @@ public class ConsoleGUI extends JFrame {
 		pnlGraph.setLayout(null);
 
 		// D�finit le JPanel des bornes nominales
-		pnlBounds.setBounds(340, 346, 355, 124);
+		pnlBounds.setBounds(342, 392, 355, 124);
 		pnlBounds.setBorder(
 				new TitledBorder(null, control.getResourceBundle().getString("consoleGUIViewOverflowNominalValues"),
 						TitledBorder.LEADING, TitledBorder.TOP, null, Color.GRAY));
-		pnlBounds.setBackground(UIManager.getColor("Label.background"));
 		pnlBounds.setLayout(null);
 		pane.add(pnlBounds);
 
-		JButton btnDebord = new JButton(control.getResourceBundle().getString("consoleGUIViewOverflow"));
-		btnDebord.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				controller.updateOverflowStatus();
-			}
-		});
-		btnDebord.setBounds(266, 15, 79, 23);
-		pnlBounds.add(btnDebord);
-		
-
-		JSlider overflowSliderMin = new JSlider();
+		overflowSliderMin = new Slider();
 		overflowSliderMin.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent c) {
-				controller.setOverflowMin(((JSlider) c.getSource()).getValue());
+				controller.setOverflowMin(((Slider) c.getSource()).getValue());
+				controller.updateOverflowStatus();
+				lblOverflowMin.setText(String.valueOf(((Slider) (c.getSource())).getValue()));
 			}
 		});
 		overflowSliderMin.setBounds(16, 40, 240, 25);
 		pnlBounds.add(overflowSliderMin);
-		
-		JSlider overflowSliderMax = new JSlider();
+
+		overflowSliderMax = new Slider();
 		overflowSliderMax.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent c) {
-				controller.setOverflowMax(((JSlider) c.getSource()).getValue());
+				controller.setOverflowMax(((Slider) c.getSource()).getValue());
+				controller.updateOverflowStatus();
+				lblOverflowMax.setText(String.valueOf(((Slider) (c.getSource())).getValue()));
 			}
 		});
-		
+
 		overflowSliderMax.setBounds(15, 88, 240, 25);
 		pnlBounds.add(overflowSliderMax);
 
-		JLabel lblDebordMin = new JLabel(control.getResourceBundle().getString("consoleGUIViewMinimum"));
+		Label lblDebordMin = new Label(control.getResourceBundle().getString("consoleGUIViewMinimum"));
 		lblDebordMin.setBounds(15, 20, 79, 14);
 		pnlBounds.add(lblDebordMin);
 
-		JLabel lblDebordMaximum = new JLabel(control.getResourceBundle().getString("consoleGUIViewMaximum"));
+		Label lblDebordMaximum = new Label(control.getResourceBundle().getString("consoleGUIViewMaximum"));
 		lblDebordMaximum.setBounds(15, 70, 79, 14);
 		pnlBounds.add(lblDebordMaximum);
 
-		JLabel lbAlerte = new JLabel();
-		lbAlerte.setIcon(new ImageIcon("img/s_green_button.png"));
-		lbAlerte.setBounds(270, 42, 75, 75);
-		pnlBounds.add(lbAlerte);
-		
-		lblOverflowMin = new JTextField();
+		alertLabel = new Label("");
+		alertLabel.setIcon(new ImageIcon("img/s_green_button.png"));
+		alertLabel.setBounds(270, 42, 75, 75);
+		pnlBounds.add(alertLabel);
+
+		lblOverflowMin = new TextField();
 		lblOverflowMin.setBounds(91, 16, 114, 21);
 		pnlBounds.add(lblOverflowMin);
 		lblOverflowMin.setColumns(10);
-		
-		lblOverflowMax = new JTextField();
+
+		lblOverflowMax = new TextField();
 		lblOverflowMax.setBounds(91, 67, 114, 21);
 		pnlBounds.add(lblOverflowMax);
 		lblOverflowMax.setColumns(10);
 
+		Panel multiStadiumPanel = new Panel();
+		multiStadiumPanel.setBounds(12, 12, 680, 39);
+		getContentPane().add(multiStadiumPanel);
+		multiStadiumPanel.setLayout(null);
+
+		availableStadiumDropdown = new ComboBox<String>();
+		availableStadiumDropdown.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (isReady) {
+					controller
+							.updateConsoleView(loadedStadiums.get((String) availableStadiumDropdown.getSelectedItem()));
+				}
+				selectedStadiumNameLabel
+						.setText("Stade selectionné : " + (String) availableStadiumDropdown.getSelectedItem());
+			}
+		});
+		availableStadiumDropdown.setBounds(0, 0, 122, 26);
+		multiStadiumPanel.add(availableStadiumDropdown);
+
+		selectedStadiumNameLabel = new Label("<placeholder>");
+		selectedStadiumNameLabel.setBounds(443, 0, 237, 17);
+		multiStadiumPanel.add(selectedStadiumNameLabel);
+
 		this.setLocation(100, 100);
-		
+
 		addWindowListener(new WindowAdapter() {
 			@Override
-            public void windowClosing(WindowEvent evt){
-            	controller.quit();
-            }
-        });
+			public void windowClosing(WindowEvent evt) {
+				controller.quit();
+			}
+		});
 	}
 
 	public void updateTable() {
@@ -340,6 +377,24 @@ public class ConsoleGUI extends JFrame {
 		scrollPane.remove(laTable);
 		scrollPane.setViewportView(laTable);
 		setChart();
+	}
+
+	/**
+	 * Populate stadium dropdown Creates hashmap with each stadium IDs with the
+	 * corresponding stadium.
+	 * 
+	 * @param stadiums
+	 */
+	public void populateStadiumDropdown(ArrayList<Stadium> stadiums) {
+		loadedStadiums.clear();
+		this.isReady = false;
+
+		for (Stadium stadium : stadiums) {
+			availableStadiumDropdown.addItem(stadium.getStadiumName());
+			loadedStadiums.put(stadium.getStadiumName(), stadium);
+		}
+
+		this.isReady = true;
 	}
 
 	/**
@@ -362,10 +417,10 @@ public class ConsoleGUI extends JFrame {
 		float moy = 0;
 		DecimalFormat round = new DecimalFormat("0.##");
 		Object[][] dataTable = new Object[mesures.size()][3];
-		
-		//laTable.setModel(new DefaultTableModel());
-		
-		if(mesures.isEmpty())
+
+		// laTable.setModel(new DefaultTableModel());
+
+		if (mesures.isEmpty())
 			return this.laTable;
 
 		if (rdbtnCelsius.isSelected()) {
@@ -496,7 +551,7 @@ public class ConsoleGUI extends JFrame {
 				true, // tooltips
 				false // urls
 		);
-		
+
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBounds(5, 20, 320, 190);
 		chartPanel.setVisible(true);
@@ -539,44 +594,37 @@ public class ConsoleGUI extends JFrame {
 		chart.fireChartChanged();
 	}
 
-	/**
-	 * <p>
-	 * Classe interne qui g�re le clique sur le bouton filtrer
-	 * 
-	 * @author J�r�me Valenti
-	 */
-	class filtrerData implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
+	private void filter() {
+		control.setMesures(Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID()));
 
-			control.setMesures(Mesure.getMesuresFromStadiumID(currentStadium.getStadiumID()));
-			
-			control.setMesures(control.filtrerLesMesure(choixZone.getSelectedItem().toString()));
-			displayLesMesures(control.getMesures());
-			updateGraph();
+		control.setMesures(control.filtrerLesMesure(zoneDropdown.getSelectedItem().toString()));
+		updateGraph();
 
-			// Construit le tableau d'objet
-			laTable = setTable(control.getMesures());
+		// Construit le tableau d'objet
+		laTable = setTable(control.getMesures());
 
-			// Definit le JScrollPane qui va recevoir la JTable
-			scrollPane.setViewportView(laTable);
+		// Definit le JScrollPane qui va recevoir la JTable
+		scrollPane.setViewportView(laTable);
 
-			System.out.println("Before setChart in filtrerData()");
-			// affiche le graphique
-			setChart();
-			System.out.println("After setChart in filtrerData()");
-		}
+		setChart();
 	}
 
-	private void displayLesMesures(ArrayList<Mesure> uneCollection) {
-
-		for (int i = 0; i < uneCollection.size(); i++) {
-			System.out.println(i + " " + uneCollection.get(i).getNumZone() + " | " + uneCollection.get(i).getHoroDate()
-					+ " | " + uneCollection.get(i).getCelsius());
-		}
+	public void setAlertIcon(ImageIcon img) {
+		alertLabel.setIcon(img);
 	}
 
 	public void setCurrentStadium(Stadium currentStadium) {
 		this.currentStadium = currentStadium;
+		ArrayList<String> zones = currentStadium.getZones();
+		isReady = false;
+		zoneDropdown.removeAllItems();
+		zoneDropdown.addItem("*");
+
+		for (String zone : zones) {
+			zoneDropdown.addItem(zone);
+		}
+
+		isReady = true;
 	}
 
 	public Stadium getCurrentStadium() {

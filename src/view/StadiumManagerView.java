@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -39,16 +41,16 @@ public class StadiumManagerView extends JFrame {
 
 		for (Stadium stadium : controller.getUserStadiums()) {
 			JButton button = new JButton(stadium.getStadiumName());
-			
+
 			button.addMouseListener(new MouseAdapter() {
-				
+
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					controller.updateConsoleView(stadium);
 					super.mouseClicked(e);
 				}
 			});
-			
+
 			button.setAlignmentX(Component.LEFT_ALIGNMENT);
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			button.setPreferredSize(

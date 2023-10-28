@@ -3,13 +3,9 @@ package model;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.ArrayList;
 
 import control.Controller;
-import utils.DatabaseHelper;
 
 public class Stadium implements IModel {
 
@@ -73,6 +69,25 @@ public class Stadium implements IModel {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	public ArrayList<String> getZones() {
+		try {
+			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
+			ResultSet res = st
+					.executeQuery("SELECT DISTINCT Mesure.num_zone FROM Mesure WHERE Mesure.ID_Stadium = '" + id + "'");
+
+			ArrayList<String> data = new ArrayList<>();
+
+			while (res.next()) {
+				data.add(res.getString("num_zone"));
+			}
+
+			return data;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
