@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.iv.RandomIvGenerator;
+import org.jasypt.properties.EncryptableProperties;
+
 public class Config {
 
 	// Locale
@@ -39,12 +43,18 @@ public class Config {
 	public static final int MAX_PASSWORD_LENGTH = 24;
 
 	public Properties loadConfigFile(String filePath) {
-		Properties properties = new Properties();
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-            properties.load(fileInputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return properties;
+		StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+		//TODO Default password 
+		encryptor.setPassword("password");
+		encryptor.setAlgorithm("PBEWithHMACSHA512AndAES_256");
+		encryptor.setIvGenerator(new RandomIvGenerator());
+		
+		Properties properties = new EncryptableProperties(encryptor);
+		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+			properties.load(fileInputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return properties;
 	}
 }

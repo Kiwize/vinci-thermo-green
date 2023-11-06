@@ -31,8 +31,8 @@ public class DatabaseHelper {
 		} catch (final ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		
 		this.cfg = new Config();
-
 		Properties properties = cfg.loadConfigFile(Config.DBENVFILEPATH);
 
 		url = properties.getProperty("db.url");
