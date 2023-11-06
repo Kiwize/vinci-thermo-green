@@ -43,7 +43,7 @@ public class Start {
 	public EError chkBoot() {
 		// Database verification
 		try {
-			final File file = new File(Config.DBENVFILEPATH);
+			final File file = new File(Config.DBENVFILEPATH_OLD);
 			final FileReader fileReader = new FileReader(file);
 			fileReader.close();
 		} catch (final IOException e) {
@@ -53,7 +53,7 @@ public class Start {
 		}
 
 		try {
-			final DatabaseHelper db = new DatabaseHelper();
+			final DatabaseHelper db = new DatabaseHelper(new Config());
 			db.close();
 		} catch (ClassNotFoundException | SQLException e) {
 			writeCrashLog(EError.UNREACHABLE_DATABASE, e);
