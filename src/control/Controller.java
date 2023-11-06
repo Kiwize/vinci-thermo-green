@@ -53,6 +53,7 @@ public class Controller {
 	private final ResourceBundle rc;
 	private final Locale locale;
 
+	private Config config;
 	private DatabaseHelper db;
 
 	private float overflowMin;
@@ -72,7 +73,9 @@ public class Controller {
 
 	public Controller() throws ParseException {
 		locale = Locale.getDefault();
+		config = new Config();
 		rc = ResourceBundle.getBundle("locale/locale", Config.DEFAULT_LOCALE);
+		Controller.INSTANCE = this;
 		passwordValidator = new PasswordValidator(
 				new LengthRule(Config.MIN_PASSWORD_LENGTH, Config.MAX_PASSWORD_LENGTH),
 				new CharacterRule(EnglishCharacterData.LowerCase, 1),
@@ -83,15 +86,11 @@ public class Controller {
 				new IllegalSequenceRule(EnglishSequenceData.USQwerty, 4, false), new WhitespaceRule());
 
 		try {
-			db = new DatabaseHelper();
+			db = new DatabaseHelper(config);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-		
-		Controller.INSTANCE = this;
-		
 		user = new User();
-
 		consoleGui = new ConsoleGUI(this);
 		loginView = new LoginView(this);
 		passchview = new PasswordChangeView(this);
@@ -205,11 +204,11 @@ public class Controller {
 				if (mesure.getIDStadium().equals(consoleGui.getCurrentStadium().getStadiumID())) {
 					consoleGui.setAlertIcon(new ImageIcon("img/s_green_button.png"));
 
-					//Temp outside range
+					// Temp outside range
 					if (mesure.getCelsius() < overflowMin || mesure.getCelsius() > overflowMax) {
 						consoleGui.setAlertIcon(new ImageIcon("img/s_red_button.png"));
-						
-						//TODO Display temp in red in the table and/or in the graph
+
+						// TODO Display temp in red in the table and/or in the graph
 					}
 				}
 			}
@@ -275,7 +274,7 @@ public class Controller {
 	public void setMesures(ArrayList<Mesure> mesures) {
 		this.mesures = mesures;
 	}
-	
+
 	public Locale getLocale() {
 		return locale;
 	}
@@ -355,4 +354,9 @@ public class Controller {
 			return callbackError;
 		}
 	}
+
+	public Config getConfig() {
+		return config;
+	}
+
 }

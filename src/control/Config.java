@@ -42,10 +42,10 @@ public class Config {
 	public static final int MIN_PASSWORD_LENGTH = 12;
 	public static final int MAX_PASSWORD_LENGTH = 24;
 
-	public Properties loadConfigFile(String filePath) {
+	public Properties loadConfigFile(String filePath, String password) {
 		StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
 		//TODO Default password 
-		encryptor.setPassword("password");
+		encryptor.setPassword(password);
 		encryptor.setAlgorithm("PBEWithHMACSHA512AndAES_256");
 		encryptor.setIvGenerator(new RandomIvGenerator());
 		

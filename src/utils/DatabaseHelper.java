@@ -1,8 +1,5 @@
 package utils;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -25,15 +22,15 @@ public class DatabaseHelper {
 	private ArrayList<Statement> activeStatements;
 	private final int STATEMENT_COUNT = 3;
 
-	public DatabaseHelper() throws ClassNotFoundException, SQLException {
+	public DatabaseHelper(Config config) throws ClassNotFoundException, SQLException {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (final ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		
-		this.cfg = new Config();
-		Properties properties = cfg.loadConfigFile(Config.DBENVFILEPATH);
+		cfg = config;
+		Properties properties = cfg.loadConfigFile(Config.DBENVFILEPATH, "password");
 
 		url = properties.getProperty("db.url");
 		username = properties.getProperty("db.username");
@@ -50,7 +47,7 @@ public class DatabaseHelper {
 			activeStatements.add(con.createStatement());
 		}
 	}
-
+	
 	public Connection getCon() {
 		return con;
 	}

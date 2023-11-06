@@ -53,7 +53,7 @@ public class Start {
 		}
 
 		try {
-			final DatabaseHelper db = new DatabaseHelper();
+			final DatabaseHelper db = new DatabaseHelper(new Config());
 			db.close();
 		} catch (ClassNotFoundException | SQLException e) {
 			writeCrashLog(EError.UNREACHABLE_DATABASE, e);
