@@ -8,12 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
 import control.Controller;
-import utils.DatabaseHelper;
 
 /**
  * <p>
@@ -30,7 +28,7 @@ import utils.DatabaseHelper;
  * <li>horadat&eacute;ee par la date et l'heure.<br />
  * </li>
  * </ul>
- * 
+ *
  * @author jvalenti
  * @version 2.0.0
  *
@@ -40,91 +38,39 @@ public class Mesure implements IModel {
 	private int id;
 
 	/**
-	 * <p>
-	 * numZone contient le num�ro de la zone mesur�e
-	 * </p>
+	 *numZone contient le num�ro de la zone mesur�e
 	 */
 	private int numZone;
 	/**
-	 * <p>
 	 * horoDate contient la date et l'heure de la mesure au format aa-mm-jj hh:mm
-	 * </p>
 	 */
 	private Date horoDate;
 	/**
-	 * <p>
 	 * valFahrenheit contient la valeur de la temp�rature mesur�e en degr�
 	 * Fahrenheit
-	 * </p>
 	 */
 	private float fahrenheit;
-
 	private String IDStadium;
+	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
 
 	public Mesure(int id) {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-			ResultSet result = st.executeQuery(
+			final ResultSet result = currentStatement.executeQuery(
 					"SELECT Mesure.num_zone, Mesure.Temp, Mesure.Date_mesure, Mesure.ID_Stadium FROM Mesure WHERE Mesure.ID_mesure = "
 							+ id + ";");
 
 			if (!result.next()) {
-				this.id = id;
-				this.numZone = -1;
-				this.fahrenheit = -255.0f;
-				this.horoDate = null;
-				this.IDStadium = "";
+				throw new IllegalArgumentException();
 			} else {
 				this.id = id;
-				this.numZone = result.getInt("num_zone");
-				this.fahrenheit = result.getFloat("Temp");
-				this.horoDate = result.getDate("Date_mesure");
-				this.IDStadium = result.getString("ID_Stadium");
+				numZone = result.getInt("num_zone");
+				fahrenheit = result.getFloat("Temp");
+				horoDate = result.getDate("Date_mesure");
+				IDStadium = result.getString("ID_Stadium");
 			}
-
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public Mesure() {
-		this.numZone = 0;
-		this.horoDate = new Date();
-		this.fahrenheit = 0.0f;
-		this.IDStadium = "STD01";
-	}
-
-	public Mesure(int pZone, Date pDate, float pFahrenheit) {
-		this.numZone = pZone;
-		this.horoDate = pDate;
-		this.fahrenheit = pFahrenheit;
-		this.IDStadium = "STD01";
-	}
-
-	public Mesure(int pZone, Date pDate, float pFahrenheit, String stadeID) {
-		this.numZone = pZone;
-		this.horoDate = pDate;
-		this.fahrenheit = pFahrenheit;
-		this.IDStadium = stadeID;
-	}
-
-	public static ArrayList<Mesure> getMesuresFromStadiumID(String ID) {
-		try {
-			ArrayList<Mesure> mesures = new ArrayList<>();
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-
-			ResultSet set = st
-					.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure WHERE Mesure.ID_Stadium = '" + ID + "'");
-
-			while (set.next()) {
-				mesures.add(new Mesure(set.getInt("ID_Mesure")));
-			}
-			return mesures;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-
 	}
 
 	public String getIDStadium() {
@@ -156,34 +102,26 @@ public class Mesure implements IModel {
 	}
 
 	public void setFahrenheit(float valFahrenheit) {
-		this.fahrenheit = valFahrenheit;
+		fahrenheit = valFahrenheit;
 	}
 
 	/**
-	 * <p>
 	 * Convertit Fahrenheit en �Celsius
-	 * </p>
-	 * 
 	 * @since 2.0.0
 	 * @return float t�Celsius
 	 */
 	public float getCelsius() {
-		// return (float) (valFahrenheit - 32) / 1.8)
 		return (fahrenheit - 32.0f) / 1.8f;
 	}
 
 	@Override
 	public boolean save() {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
+			return currentStatement.execute("UPDATE Mesure SET Mesure.num_zone = '" + numZone + "', Mesure.Date_mesure='"
+					+ horoDate + "', Mesure.Temp='" + fahrenheit + "', Mesure.ID_Stadium='" + IDStadium
+					+ "' where Mesure.ID_Mesure = " + id + ";");
 
-			boolean res = st.execute("UPDATE Mesure SET Mesure.num_zone = '" + this.numZone + "', Mesure.Date_mesure='"
-					+ this.horoDate + "', Mesure.Temp='" + this.fahrenheit + "', Mesure.ID_Stadium='" + this.IDStadium
-					+ "' where Mesure.ID_Mesure = " + this.id + ";");
-
-			return res;
-
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -192,18 +130,13 @@ public class Mesure implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-
 			// Format date if needed
-			DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
+			final DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
+			return currentStatement.execute(
+					"INSERT INTO Mesure (num_zone, Date_mesure, Temp, ID_Stadium) VALUES ('" + numZone + "','"
+							+ format.format(horoDate) + "','" + fahrenheit + "','" + IDStadium + "')");
 
-			boolean res = st.execute(
-					"INSERT INTO Mesure (num_zone, Date_mesure, Temp, ID_Stadium) VALUES ('" + this.numZone + "','"
-							+ format.format(this.horoDate) + "','" + this.fahrenheit + "','" + this.IDStadium + "')");
-
-			return res;
-
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 			return false;
 		}

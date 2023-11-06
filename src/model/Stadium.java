@@ -13,45 +13,35 @@ public class Stadium implements IModel {
 	private String name;
 	private int id_user;
 
+	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
+	private final Statement secondStatement = Controller.INSTANCE.getDB().getStatement(1);
+
 	public Stadium(String id) {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-			ResultSet result = st.executeQuery(
+			final ResultSet result = currentStatement.executeQuery(
 					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user FROM Stadium WHERE Stadium.ID_Stadium = '"
 							+ id + "';");
 
 			if (!result.next()) {
-				this.id = id;
-				this.name = "default";
-				this.id_user = 0;
+				throw new IllegalArgumentException();
 			} else {
 				this.id = id;
-				this.name = result.getString("nom_stade");
-				this.id_user = result.getInt("id_user");
+				name = result.getString("nom_stade");
+				id_user = result.getInt("id_user");
 			}
 
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public Stadium(String ID_Stadium, String nom_stade, int id_user) {
-		this.id = ID_Stadium;
-		this.name = nom_stade;
-		this.id_user = id_user;
 	}
 
 	@Override
 	public boolean save() {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
+			return currentStatement.execute("UPDATE Stadium SET Stadium.nom_stade='" + name + "', Stadium.id_user='" + id_user + "'"
+					+ "' where Stadium.ID_Stadium = " + id + ";");
 
-			boolean res = st.execute("UPDATE Stadium SET Stadium.nom_stade='" + this.name + "', Stadium.id_user='"
-					+ this.id_user + "'" + "' where Stadium.ID_Stadium = " + this.id + ";");
-
-			return res;
-
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -60,13 +50,10 @@ public class Stadium implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-			boolean res = st.execute("INSERT INTO Stadium (ID_Stadium, nom_stade, id_user) VALUES ('" + this.id + "', '"
-					+ this.name + "','" + this.id_user + "')");
+			return currentStatement.execute("INSERT INTO Stadium (ID_Stadium, nom_stade, id_user) VALUES ('" + id + "', '" + name
+					+ "','" + id_user + "')");
 
-			return res;
-
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -74,20 +61,33 @@ public class Stadium implements IModel {
 
 	public ArrayList<String> getZones() {
 		try {
-			Statement st = Controller.INSTANCE.getDB().getCon().createStatement();
-			ResultSet res = st
+			final ResultSet res = currentStatement
 					.executeQuery("SELECT DISTINCT Mesure.num_zone FROM Mesure WHERE Mesure.ID_Stadium = '" + id + "'");
 
-			ArrayList<String> data = new ArrayList<>();
+			final ArrayList<String> data = new ArrayList<>();
 
 			while (res.next()) {
 				data.add(res.getString("num_zone"));
 			}
 
 			return data;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+
+	public void getMesures(IMesureStadiumMatch action) {
+		try {
+			final ResultSet res = secondStatement
+					.executeQuery("SELECT Mesure.ID_Mesure FROM Mesure WHERE Mesure.ID_Stadium = '" + id + "'");
+
+			while (res.next()) {
+				action.onMatch(res.getInt("ID_Mesure"));
+			}
+
+		} catch (final SQLException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -101,6 +101,10 @@ public class Stadium implements IModel {
 
 	public String getStadiumName() {
 		return name;
+	}
+
+	public interface IMesureStadiumMatch {
+		void onMatch(int mesureID);
 	}
 
 }

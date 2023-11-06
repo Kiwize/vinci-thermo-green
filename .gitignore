@@ -1,7 +1,7 @@
 *.class
 *.log
 .metadata/*
-.jar
+*.jar
 lib/*
 biblio/*
 .settings
@@ -12,3 +12,4 @@ bin/
 data/*
 img/*
 doc/*
+build/*
