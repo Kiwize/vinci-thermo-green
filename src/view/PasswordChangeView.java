@@ -71,11 +71,11 @@ public class PasswordChangeView extends JFrame {
 		passwordStrength.setBounds(12, 148, 219, 14);
 		getContentPane().add(passwordStrength);
 
-		final Label lblFor = new Label("Force du mot de passe :");
+		final Label lblFor = new Label(controller.getResourceBundle().getString("passwordChangeViewPasswordStrength"));
 		lblFor.setBounds(12, 131, 164, 17);
 		getContentPane().add(lblFor);
 
-		final ButtonRound btnValider = new ButtonRound("Valider", 148, 179);
+		final ButtonRound btnValider = new ButtonRound(controller.getResourceBundle().getString("passwordChangeViewSubmit"), 148, 179);
 		btnValider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -84,32 +84,32 @@ public class PasswordChangeView extends JFrame {
 		});
 		getContentPane().add(btnValider);
 
-		chkboxSimilarPasswords = new CheckBox("Mots de passes identiques");
+		chkboxSimilarPasswords = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewSamePasswords"));
 		chkboxSimilarPasswords.setBounds(270, 8, 214, 25);
 		chkboxSimilarPasswords.setEnabled(false);
 		getContentPane().add(chkboxSimilarPasswords);
 
-		chkboxMajuscule = new CheckBox("1 Majuscule");
+		chkboxMajuscule = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewUppercase"));
 		chkboxMajuscule.setBounds(270, 39, 114, 25);
 		getContentPane().add(chkboxMajuscule);
 		chkboxMajuscule.setEnabled(false);
 
-		chkboxMinuscule = new CheckBox("1 Minuscule");
+		chkboxMinuscule = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewLowercase"));
 		chkboxMinuscule.setBounds(270, 68, 114, 25);
 		getContentPane().add(chkboxMinuscule);
 		chkboxMinuscule.setEnabled(false);
 
-		chkboxSpecialChar = new CheckBox("1 Caractère spécial");
+		chkboxSpecialChar = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewSpecialChar"));
 		chkboxSpecialChar.setBounds(270, 124, 214, 25);
 		getContentPane().add(chkboxSpecialChar);
 		chkboxSpecialChar.setEnabled(false);
 
-		chkboxMinLength = new CheckBox("Au moins 12 caractères");
+		chkboxMinLength = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewSpecialChar"));
 		chkboxMinLength.setBounds(270, 153, 214, 25);
 		getContentPane().add(chkboxMinLength);
 		chkboxMinLength.setEnabled(false);
 
-		chkboxDigit = new CheckBox("1 Chiffre");
+		chkboxDigit = new CheckBox(controller.getResourceBundle().getString("passwordChangeViewNumeric"));
 		chkboxDigit.setBounds(270, 97, 114, 25);
 		getContentPane().add(chkboxDigit);
 		chkboxDigit.setEnabled(false);

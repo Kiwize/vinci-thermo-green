@@ -81,7 +81,7 @@ public class LoginView extends JFrame {
 		visiblePasswordBtn.setBounds(324, 98, 25, 25);
 		getContentPane().add(visiblePasswordBtn);
 
-		final ButtonRound btnChangePassword = new ButtonRound("Modifier le mot de passe", getWidth() / 4 - 105 / 2, 160);
+		final ButtonRound btnChangePassword = new ButtonRound(controller.getResourceBundle().getString("loginPasswordChange"), getWidth() / 4 - 105 / 2, 160);
 		btnChangePassword.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

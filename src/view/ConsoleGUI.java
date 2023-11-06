@@ -361,7 +361,7 @@ public class ConsoleGUI extends JFrame {
 		availableStadiumDropdown.setBounds(164, 0, 122, 26);
 		multiStadiumPanel.add(availableStadiumDropdown);
 
-		final Label lblStadeSlectionn = new Label("Stade sélectionné : ");
+		final Label lblStadeSlectionn = new Label(controller.getResourceBundle().getString("consoleGUISelectedStadium"));
 		lblStadeSlectionn.setBounds(0, 5, 146, 17);
 		multiStadiumPanel.add(lblStadeSlectionn);
 
