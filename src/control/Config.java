@@ -2,20 +2,23 @@ package control;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Properties;
 
 public class Config {
 
-	//Locale
+	// Locale
 	public static final Locale DEFAULT_LOCALE = Locale.US;
 
-	//Config files
-	public static final String DBENVFILEPATH = "data/db.env";
+	// Config files
+	public static final String DBENVFILEPATH_OLD = "data/db.env";
+	public static final String DBENVFILEPATH = "data/dbenv.properties";
 
+	// Look and feel
 
-	//Look and feel
-
-	//Colors
+	// Colors
 	public static final Color MAIN_COLOR = new Color(0, 0, 180);
 	public static final Color CLICKED_COLOR = new Color(0, 0, 220);
 	public static final Color ROLLOVER_COLOR = new Color(0, 0, 200);
@@ -28,12 +31,20 @@ public class Config {
 
 	public static final Color PANEL_TRANSLUENT_BACKGROUND = new Color(200, 200, 200, 100);
 
-
-	//Fonts
+	// Fonts
 	public static final Font MAIN_FONT = new Font("Consolas", Font.PLAIN, 12);
 
-	//Password config parameters
+	// Password config parameters
 	public static final int MIN_PASSWORD_LENGTH = 12;
 	public static final int MAX_PASSWORD_LENGTH = 24;
 
+	public Properties loadConfigFile(String filePath) {
+		Properties properties = new Properties();
+        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+            properties.load(fileInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
+	}
 }

@@ -43,7 +43,7 @@ public class Start {
 	public EError chkBoot() {
 		// Database verification
 		try {
-			final File file = new File(Config.DBENVFILEPATH);
+			final File file = new File(Config.DBENVFILEPATH_OLD);
 			final FileReader fileReader = new FileReader(file);
 			fileReader.close();
 		} catch (final IOException e) {
