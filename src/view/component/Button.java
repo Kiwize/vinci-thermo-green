@@ -2,6 +2,7 @@ package view.component;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Transparency;
 
 import javax.swing.JButton;
 
@@ -21,11 +22,12 @@ public class Button extends JButton {
 		super.setBounds(x, y, 105, 27);
 		super.setSize(130, 30);
 	}
-	
+
 	public void setBackgroundVisible(boolean value) {
-		if(!value)
-			super.setBackground(new Color(0, 0, 0, Color.TRANSLUCENT));
-		else
+		if(!value) {
+			super.setBackground(new Color(0, 0, 0, Transparency.TRANSLUCENT));
+		} else {
 			super.setBackground(Config.MAIN_COLOR);
+		}
 	}
 }

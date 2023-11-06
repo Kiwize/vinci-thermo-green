@@ -5,8 +5,6 @@ import java.awt.Graphics;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
-import javax.swing.JButton;
-
 import control.Config;
 
 public class ButtonRound extends Button {
@@ -29,13 +27,13 @@ public class ButtonRound extends Button {
 		if(getModel().isRollover()) {
 			g.setColor(Config.ROLLOVER_COLOR);
 		}
-		
+
 		if (getModel().isArmed()) {
 			g.setColor(Config.CLICKED_COLOR);
 		} else {
 			g.setColor(getBackground());
 		}
-		
+
 		//Pos X, Pos Y, Size X, Size Y, BorderRadius X, BorderRadius Y
 		g.fillRoundRect(0, 0, getSize().width - 1, getSize().height - 1, 35, 35);
 		super.paintComponent(g);

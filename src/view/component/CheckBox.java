@@ -10,10 +10,10 @@ public class CheckBox extends JCheckBox{
 
 	public CheckBox(String text) {
 		super(text);
-		this.setBackground(Config.SECONDARY_COLOR);
-		this.setForeground(Config.MAIN_FOREGROUND);
+		setBackground(Config.SECONDARY_COLOR);
+		setForeground(Config.MAIN_FOREGROUND);
 	}
-	
-	
-	
+
+
+
 }
