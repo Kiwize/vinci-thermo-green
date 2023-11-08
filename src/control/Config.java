@@ -23,11 +23,11 @@ public class Config {
 	// Look and feel
 
 	// Colors
-	public static final Color MAIN_COLOR = new Color(0, 0, 180);
+	public static final Color MAIN_COLOR = new Color(51, 40, 144);
 	public static final Color CLICKED_COLOR = new Color(0, 0, 220);
 	public static final Color ROLLOVER_COLOR = new Color(0, 0, 200);
 
-	public static final Color SECONDARY_COLOR = new Color(89, 89, 89);
+	public static final Color SECONDARY_COLOR = new Color(20, 18, 67);
 
 	public static final Color MAIN_FOREGROUND = new Color(255, 255, 255);
 
