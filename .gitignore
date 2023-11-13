@@ -8,8 +8,9 @@ biblio/*
 *.exe
 Thumbs.db
 .idea/*
-bin/
+bin/*
 data/*
 img/*
 doc/*
 build/*
+
