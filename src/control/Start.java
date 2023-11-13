@@ -12,6 +12,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import config.Config;
+import config.ConfigManager;
 import utils.DatabaseHelper;
 
 public class Start {
@@ -53,7 +55,7 @@ public class Start {
 		}
 
 		try {
-			final DatabaseHelper db = new DatabaseHelper(new Config());
+			final DatabaseHelper db = new DatabaseHelper(new ConfigManager(Config.DBENVFILEPATH));
 			db.close();
 		} catch (ClassNotFoundException | SQLException e) {
 			writeCrashLog(EError.UNREACHABLE_DATABASE, e);

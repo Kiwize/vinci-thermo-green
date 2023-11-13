@@ -24,6 +24,8 @@ import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.passay.WhitespaceRule;
 
+import config.Config;
+import config.ConfigManager;
 import model.Mesure;
 import model.Stadium;
 import model.User;
@@ -50,14 +52,15 @@ public class Controller {
 
 	public static Controller INSTANCE;
 
-	private final ResourceBundle rc;
-	private final Locale locale;
+	private ResourceBundle rc;
 
-	private Config config;
+	private ConfigManager cfgManager;
 	private DatabaseHelper db;
 
 	private float overflowMin;
 	private float overflowMax;
+	
+	private HashMap<String, String> LOCALE_TAG_MAP;
 
 	// Views
 	private final ConsoleGUI consoleGui;
@@ -72,9 +75,11 @@ public class Controller {
 	private final PasswordValidator passwordValidator;
 
 	public Controller() throws ParseException {
-		locale = Locale.getDefault();
-		config = new Config();
-		rc = ResourceBundle.getBundle("locale/locale", Config.DEFAULT_LOCALE);
+		cfgManager = new ConfigManager(Config.DBENVFILEPATH);
+
+		rc = ResourceBundle.getBundle("locale/locale",
+				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+
 		Controller.INSTANCE = this;
 		passwordValidator = new PasswordValidator(
 				new LengthRule(Config.MIN_PASSWORD_LENGTH, Config.MAX_PASSWORD_LENGTH),
@@ -86,10 +91,15 @@ public class Controller {
 				new IllegalSequenceRule(EnglishSequenceData.USQwerty, 4, false), new WhitespaceRule());
 
 		try {
-			db = new DatabaseHelper(config);
+			db = new DatabaseHelper(cfgManager);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
+		
+		LOCALE_TAG_MAP = new HashMap<>();
+		LOCALE_TAG_MAP.put(Locale.US.toLanguageTag(), Locale.US.getDisplayLanguage());
+		LOCALE_TAG_MAP.put(Locale.FRANCE.toLanguageTag(), Locale.FRANCE.getDisplayLanguage());
+		
 		user = new User();
 		consoleGui = new ConsoleGUI(this);
 		loginView = new LoginView(this);
@@ -144,6 +154,19 @@ public class Controller {
 				mesures.add(new Mesure(mesureID));
 			});
 		});
+	}
+
+	public void updateDisplayedLocale(Locale newLocale) {
+		if (!cfgManager.updateSettings("locale.preferred", newLocale.toLanguageTag()))
+			System.err.println("Error updating config file !");
+		rc = ResourceBundle.getBundle("locale/locale",
+				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+
+		consoleGui.updateComponentsText();
+		
+		consoleGui.invalidate();
+		consoleGui.validate();
+		consoleGui.repaint();
 	}
 
 	public void changePassword(String password, String confirm) {
@@ -275,10 +298,6 @@ public class Controller {
 		this.mesures = mesures;
 	}
 
-	public Locale getLocale() {
-		return locale;
-	}
-
 	public ResourceBundle getResourceBundle() {
 		return rc;
 	}
@@ -313,6 +332,10 @@ public class Controller {
 
 	public PasswordChangeView getPasswordChangeView() {
 		return passchview;
+	}
+
+	public ConfigManager getConfigManager() {
+		return cfgManager;
 	}
 
 	/**
@@ -354,9 +377,4 @@ public class Controller {
 			return callbackError;
 		}
 	}
-
-	public Config getConfig() {
-		return config;
-	}
-
 }
