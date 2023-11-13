@@ -7,7 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
-import control.Config;
+import config.Config;
 import control.Controller;
 import view.component.Button;
 import view.component.ButtonRound;
@@ -22,38 +22,45 @@ public class LoginView extends JFrame {
 	private final PasswordField passwordField;
 
 	private boolean isPasswordVisible = true;
+	
+	private final int COLUMNS = 20;
+	private final int ROWS = 20;
+	
 
 	public LoginView(Controller controller) {
 		getContentPane().setBackground(Config.SECONDARY_COLOR);
 
 		setResizable(false);
 		getContentPane().setLayout(null);
-		setSize(400, 250);
+		//setSize(400, 250);
+		setSize(1920, 1080);
+		setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		setUndecorated(true);
 
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		setTitle(controller.getResourceBundle().getString("loginViewWindowTitle"));
 
 		final Label lblUsername = new Label(controller.getResourceBundle().getString("loginViewUsername"));
-		lblUsername.setBounds(70, 59, 104, 17);
+		lblUsername.setBounds(((getWidth() / COLUMNS) * 9) - 35, ((getHeight() / ROWS) * 7) + 30, 104, 17);
 		getContentPane().add(lblUsername);
 
 		final Label lblPassword = new Label(controller.getResourceBundle().getString("loginViewPassword"));
-		lblPassword.setBounds(70, 98, 93, 17);
+		lblPassword.setBounds(((getWidth() / COLUMNS) * 9) - 35, ((getHeight() / ROWS) * 8) + 30, 93, 17);
 		getContentPane().add(lblPassword);
 
 		usernameField = new TextField();
-		usernameField.setBounds(192, 57, 114, 21);
+		usernameField.setBounds(((getWidth() / COLUMNS) * 10) + 30, ((getHeight() / ROWS) * 7) + 30, 114, 21);
 		getContentPane().add(usernameField);
 		usernameField.setColumns(10);
 
 		passwordField = new PasswordField();
-		passwordField.setBounds(192, 96, 114, 21);
+		passwordField.setBounds(((getWidth() / COLUMNS) * 10) + 30, ((getHeight() / ROWS) * 8) + 30, 114, 21);
 		getContentPane().add(passwordField);
 		passwordField.setEchoChar('*');
 		passwordField.setColumns(10);
 
-		final ButtonRound btnSubmit = new ButtonRound(controller.getResourceBundle().getString("loginViewSubmit"), getWidth() / 2, 160);
+		final ButtonRound btnSubmit = new ButtonRound(controller.getResourceBundle().getString("loginViewSubmit"), ((getWidth() / COLUMNS) * 9) - 60, ((getHeight() / ROWS) * 10) + 30);
 		btnSubmit.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -78,10 +85,10 @@ public class LoginView extends JFrame {
 				isPasswordVisible = !isPasswordVisible;
 			}
 		});
-		visiblePasswordBtn.setBounds(324, 98, 25, 25);
+		visiblePasswordBtn.setBounds(((getWidth() / COLUMNS) * 11) + 58, ((getHeight() / ROWS) * 8) + 30, 25, 25);
 		getContentPane().add(visiblePasswordBtn);
 
-		final ButtonRound btnChangePassword = new ButtonRound(controller.getResourceBundle().getString("loginPasswordChange"), getWidth() / 4 - 105 / 2, 160);
+		final ButtonRound btnChangePassword = new ButtonRound(controller.getResourceBundle().getString("loginPasswordChange"), ((getWidth() / COLUMNS) * 11) - 60, ((getHeight() / ROWS) * 10) + 30);
 		btnChangePassword.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

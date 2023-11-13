@@ -5,7 +5,7 @@ import java.awt.Insets;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import control.Config;
+import config.Config;
 
 public class TextField extends JTextField {
 

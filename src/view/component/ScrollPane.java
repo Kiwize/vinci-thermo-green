@@ -2,7 +2,7 @@ package view.component;
 
 import javax.swing.JScrollPane;
 
-import control.Config;
+import config.Config;
 
 public class ScrollPane extends JScrollPane {
 
@@ -10,7 +10,7 @@ public class ScrollPane extends JScrollPane {
 
 	public ScrollPane() {
 		setBackground(Config.SECONDARY_COLOR);
-		setForeground(Config.MAIN_FOREGROUND);
+		setForeground(Config.CONSTRASTED_FOREGROUND);
 	}
 
 }

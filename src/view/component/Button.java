@@ -6,7 +6,7 @@ import java.awt.Transparency;
 
 import javax.swing.JButton;
 
-import control.Config;
+import config.Config;
 
 public class Button extends JButton {
 
@@ -16,7 +16,7 @@ public class Button extends JButton {
 		super(text);
 		super.setBackground(Config.MAIN_COLOR);
 		super.setFont(Config.MAIN_FONT);
-		super.setForeground(Config.MAIN_FOREGROUND);
+		super.setForeground(Config.CONSTRASTED_FOREGROUND);
 
 		super.setPreferredSize(new Dimension(120, 25));
 		super.setBounds(x, y, 105, 27);

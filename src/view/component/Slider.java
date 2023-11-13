@@ -2,7 +2,7 @@ package view.component;
 
 import javax.swing.JSlider;
 
-import control.Config;
+import config.Config;
 
 public class Slider extends JSlider{
 
@@ -10,7 +10,7 @@ public class Slider extends JSlider{
 
 	public Slider() {
 		super.setBackground(Config.SECONDARY_COLOR);
-		super.setForeground(Config.MAIN_FOREGROUND);
+		super.setForeground(Config.CONSTRASTED_FOREGROUND);
 	}
 
 }

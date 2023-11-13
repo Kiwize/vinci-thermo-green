@@ -2,7 +2,7 @@ package view.component;
 
 import javax.swing.JLabel;
 
-import control.Config;
+import config.Config;
 
 public class Label extends JLabel{
 

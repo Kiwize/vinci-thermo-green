@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
-import control.Config;
+import config.Config;
 
 public class ButtonRound extends Button {
 
@@ -15,8 +15,11 @@ public class ButtonRound extends Button {
 		super(text, x, y);
 		super.setBackground(Config.MAIN_COLOR);
 		super.setFont(Config.MAIN_FONT);
-		super.setForeground(Config.MAIN_FOREGROUND);
-
+		super.setForeground(Config.CONSTRASTED_FOREGROUND);
+		
+		setBorder(null);
+        setFocusPainted(false);
+		
 		super.setPreferredSize(new Dimension(120, 25));
 		setContentAreaFilled(false);
 	}
@@ -24,7 +27,7 @@ public class ButtonRound extends Button {
 	// Paint the round background and label.
 	@Override
 	protected void paintComponent(Graphics g) {
-		if(getModel().isRollover()) {
+		if (getModel().isRollover()) {
 			g.setColor(Config.ROLLOVER_COLOR);
 		}
 
@@ -34,20 +37,15 @@ public class ButtonRound extends Button {
 			g.setColor(getBackground());
 		}
 
-		//Pos X, Pos Y, Size X, Size Y, BorderRadius X, BorderRadius Y
-		g.fillRoundRect(0, 0, getSize().width - 1, getSize().height - 1, 35, 35);
-		super.paintComponent(g);
-	}
+		// Pos X, Pos Y, Size X, Size Y, BorderRadius X, BorderRadius Y
+		g.fillRoundRect(0, 0, getSize().width - 1, getSize().height - 1, 15, 15);
 
-	// Paint the border of the button using a simple stroke.
-	@Override
-	protected void paintBorder(Graphics g) {
-		//g.setColor(getForeground());
-		//g.drawRoundRect(0, 0, getSize().width - 1, getSize().height - 1, 35, 35);
+		super.paintComponent(g);
 	}
 
 	// Hit detection.
 	Shape shape;
+
 	@Override
 	public boolean contains(int x, int y) {
 		// If the button has changed size,

@@ -2,7 +2,7 @@ package view.component;
 
 import javax.swing.JPasswordField;
 
-import control.Config;
+import config.Config;
 
 public class PasswordField extends JPasswordField{
 

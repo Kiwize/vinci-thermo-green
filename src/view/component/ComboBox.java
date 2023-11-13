@@ -2,9 +2,9 @@ package view.component;
 
 import javax.swing.JComboBox;
 
-import control.Config;
+import config.Config;
 
-public class ComboBox<Object> extends JComboBox<Object> {
+public class ComboBox<E> extends JComboBox<E> {
 
 	private static final long serialVersionUID = 4941364516102660885L;
 

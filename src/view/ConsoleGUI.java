@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -33,7 +34,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import control.Config;
+import config.Config;
 import control.Controller;
 import model.Mesure;
 import model.Stadium;
@@ -66,6 +67,8 @@ public class ConsoleGUI extends JFrame {
 	private final RadioButton rdbtnCelsius;
 	private final RadioButton rdbtnFahrenheit;
 
+	private final ButtonRound refreshButton;
+
 	private final ComboBox<String> zoneDropdown = new ComboBox<>();
 	private final TextField startDate;
 	private final TextField dateFin;
@@ -76,9 +79,21 @@ public class ConsoleGUI extends JFrame {
 	private final TextField tempMin;
 	private final TextField tempMoy;
 	private final TextField tempMax;
+	private final Label graphTypeLabel;
+	private final Label zoneLabel;
+	private final Label startLabel;;
+	private final Label endLabel;
 	private final Label alertLabel;
+	private final Label lblMin;
+	private final Label lblMoy;
+	private final Label lblMax;
+	private final Label lblDebordMin;
+	private final Label lblDebordMax;
+	private final Label selectedStadiumLabel;
 
 	private final ComboBox<String> availableStadiumDropdown;
+
+	private final CheckBox chckbxDistinctZone;
 
 	private JTable laTable;
 
@@ -178,12 +193,12 @@ public class ConsoleGUI extends JFrame {
 		zoneDropdown.setBounds(115, 50, 100, 20);
 		criteriaPanel.add(zoneDropdown);
 
-		final Label zoneLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewZone"));
+		zoneLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewZone"));
 		zoneLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		zoneLabel.setBounds(15, 54, 99, 14);
 		criteriaPanel.add(zoneLabel);
 
-		final Label startLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewFrom"));
+		startLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewFrom"));
 		startLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		startLabel.setBounds(15, 83, 46, 14);
 		criteriaPanel.add(startLabel);
@@ -193,7 +208,7 @@ public class ConsoleGUI extends JFrame {
 		criteriaPanel.add(startDate);
 		startDate.setColumns(10);
 
-		final Label endLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewTo"));
+		endLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewTo"));
 		endLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
 		endLabel.setBounds(15, 114, 46, 14);
 		criteriaPanel.add(endLabel);
@@ -220,30 +235,28 @@ public class ConsoleGUI extends JFrame {
 		pnlParam.setLayout(null);
 		pane.add(pnlParam);
 
-		final CheckBox chckbxDistinctZone = new CheckBox(
-				controller.getResourceBundle().getString("consoleGUIViewDistinguishZones"));
+		chckbxDistinctZone = new CheckBox(controller.getResourceBundle().getString("consoleGUIViewDistinguishZones"));
 		chckbxDistinctZone.setEnabled(false);
 		chckbxDistinctZone.setFont(new Font("Consolas", Font.PLAIN, 12));
 		chckbxDistinctZone.setBounds(15, 20, 165, 23);
 		pnlParam.add(chckbxDistinctZone);
 
-		final Label lblTypeDeGraphique = new Label(controller.getResourceBundle().getString("consoleGUIViewGraphType"));
-		lblTypeDeGraphique.setFont(new Font("Consolas", Font.PLAIN, 12));
-		lblTypeDeGraphique.setBounds(15, 50, 120, 14);
-		pnlParam.add(lblTypeDeGraphique);
+		graphTypeLabel = new Label(controller.getResourceBundle().getString("consoleGUIViewGraphType"));
+		graphTypeLabel.setFont(new Font("Consolas", Font.PLAIN, 12));
+		graphTypeLabel.setBounds(15, 50, 120, 14);
+		pnlParam.add(graphTypeLabel);
 
 		final ComboBox<String> choixGraphique = new ComboBox<>();
 		choixGraphique.setEnabled(false);
 		choixGraphique.setBounds(152, 47, 190, 20);
 		pnlParam.add(choixGraphique);
 
-		final ButtonRound refreshButton = new ButtonRound(
-				controller.getResourceBundle().getString("consoleGUIViewRefresh"), 222, 19);
+		refreshButton = new ButtonRound(controller.getResourceBundle().getString("consoleGUIViewRefresh"), 222, 19);
 		refreshButton.setBounds(222, 19, 120, 24);
 		refreshButton.setEnabled(false);
 		pnlParam.add(refreshButton);
 
-		final Label lblMin = new Label(controller.getResourceBundle().getString("consoleGUIViewMin"));
+		lblMin = new Label(controller.getResourceBundle().getString("consoleGUIViewMin"));
 		lblMin.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMin.setBounds(15, 306, 30, 14);
 		pnlParam.add(lblMin);
@@ -254,7 +267,7 @@ public class ConsoleGUI extends JFrame {
 		pnlParam.add(tempMin);
 		tempMin.setColumns(10);
 
-		final Label lblMoy = new Label(controller.getResourceBundle().getString("consoleGUIViewAvg"));
+		lblMoy = new Label(controller.getResourceBundle().getString("consoleGUIViewAvg"));
 		lblMoy.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMoy.setBounds(137, 304, 30, 14);
 		pnlParam.add(lblMoy);
@@ -265,7 +278,7 @@ public class ConsoleGUI extends JFrame {
 		tempMoy.setBounds(177, 300, 50, 20);
 		pnlParam.add(tempMoy);
 
-		final Label lblMax = new Label(controller.getResourceBundle().getString("consoleGUIViewMax"));
+		lblMax = new Label(controller.getResourceBundle().getString("consoleGUIViewMax"));
 		lblMax.setFont(new Font("Consolas", Font.PLAIN, 12));
 		lblMax.setBounds(252, 304, 30, 14);
 		pnlParam.add(lblMax);
@@ -318,13 +331,13 @@ public class ConsoleGUI extends JFrame {
 		overflowSliderMax.setBounds(15, 88, 240, 25);
 		pnlBounds.add(overflowSliderMax);
 
-		final Label lblDebordMin = new Label(controller.getResourceBundle().getString("consoleGUIViewMinimum"));
+		lblDebordMin = new Label(controller.getResourceBundle().getString("consoleGUIViewMinimum"));
 		lblDebordMin.setBounds(15, 20, 79, 14);
 		pnlBounds.add(lblDebordMin);
 
-		final Label lblDebordMaximum = new Label(controller.getResourceBundle().getString("consoleGUIViewMaximum"));
-		lblDebordMaximum.setBounds(15, 70, 79, 14);
-		pnlBounds.add(lblDebordMaximum);
+		lblDebordMax = new Label(controller.getResourceBundle().getString("consoleGUIViewMaximum"));
+		lblDebordMax.setBounds(15, 70, 79, 14);
+		pnlBounds.add(lblDebordMax);
 
 		alertLabel = new Label("");
 		alertLabel.setIcon(new ImageIcon("img/s_green_button.png"));
@@ -342,7 +355,7 @@ public class ConsoleGUI extends JFrame {
 		lblOverflowMax.setColumns(10);
 
 		final Panel multiStadiumPanel = new Panel();
-		multiStadiumPanel.setBounds(12, 12, 680, 39);
+		multiStadiumPanel.setBounds(12, 12, 325, 39);
 		getContentPane().add(multiStadiumPanel);
 		multiStadiumPanel.setLayout(null);
 
@@ -361,9 +374,23 @@ public class ConsoleGUI extends JFrame {
 		availableStadiumDropdown.setBounds(164, 0, 122, 26);
 		multiStadiumPanel.add(availableStadiumDropdown);
 
-		final Label lblStadeSlectionn = new Label(controller.getResourceBundle().getString("consoleGUISelectedStadium"));
-		lblStadeSlectionn.setBounds(0, 5, 146, 17);
-		multiStadiumPanel.add(lblStadeSlectionn);
+		selectedStadiumLabel = new Label(controller.getResourceBundle().getString("consoleGUISelectedStadium"));
+		selectedStadiumLabel.setBounds(0, 5, 146, 17);
+		multiStadiumPanel.add(selectedStadiumLabel);
+
+		ComboBox<Locale> localeDropdown = new ComboBox<>();
+		localeDropdown.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (isReady) {
+					controller.updateDisplayedLocale((Locale) localeDropdown.getSelectedItem());
+				}
+			}
+		});
+		localeDropdown.setBounds(540, 12, 152, 26);
+		// TODO Dynamically populate combo box
+		localeDropdown.addItem(Locale.US);
+		localeDropdown.addItem(Locale.FRENCH);
+		getContentPane().add(localeDropdown);
 
 		this.setLocation(100, 100);
 
@@ -597,6 +624,7 @@ public class ConsoleGUI extends JFrame {
 
 	/**
 	 * Define active alert icon that describes overflow status.
+	 * 
 	 * @param img new image.
 	 */
 	public void setAlertIcon(ImageIcon img) {
@@ -605,6 +633,7 @@ public class ConsoleGUI extends JFrame {
 
 	/**
 	 * Set current stadium (stadium selected by the user).
+	 * 
 	 * @param currentStadium
 	 */
 	public void setCurrentStadium(Stadium currentStadium) {
@@ -630,6 +659,28 @@ public class ConsoleGUI extends JFrame {
 		updateGraph();
 		populateStadiumDropdown(controller.getStadiums());
 		setVisible(true);
+	}
+
+	public void updateComponentsText() {
+		setTitle(controller.getResourceBundle().getString("consoleGUIViewWindowTitle"));
+		rdbtnCelsius.setText(controller.getResourceBundle().getString("consoleGUIViewCelsius"));
+		rdbtnFahrenheit.setText(controller.getResourceBundle().getString("consoleGUIViewFarhenheit"));
+
+		zoneLabel.setText(controller.getResourceBundle().getString("consoleGUIViewZone"));
+		startLabel.setText(controller.getResourceBundle().getString("consoleGUIViewFrom"));
+		endLabel.setText(controller.getResourceBundle().getString("consoleGUIViewTo"));
+
+		chckbxDistinctZone.setText(controller.getResourceBundle().getString("consoleGUIViewDistinguishZones"));
+		graphTypeLabel.setText(controller.getResourceBundle().getString("consoleGUIViewGraphType"));
+		refreshButton.setText(controller.getResourceBundle().getString("consoleGUIViewRefresh"));
+
+		lblMin.setText(controller.getResourceBundle().getString("consoleGUIViewMin"));
+		lblMoy.setText(controller.getResourceBundle().getString("consoleGUIViewAvg"));
+		lblMax.setText(controller.getResourceBundle().getString("consoleGUIViewMax"));
+		
+		lblDebordMin.setText(controller.getResourceBundle().getString("consoleGUIViewMinimum"));
+		lblDebordMax.setText(controller.getResourceBundle().getString("consoleGUIViewMaximum"));
+		selectedStadiumLabel.setText(controller.getResourceBundle().getString("consoleGUISelectedStadium"));
 	}
 
 	public Stadium getCurrentStadium() {

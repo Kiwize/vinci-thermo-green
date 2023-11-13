@@ -10,7 +10,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 
-import control.Config;
+import config.Config;
 import control.Controller;
 import control.Controller.EPasswordError;
 import view.component.ButtonRound;

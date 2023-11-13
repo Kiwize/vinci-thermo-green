@@ -2,7 +2,7 @@ package view.component;
 
 import javax.swing.JCheckBox;
 
-import control.Config;
+import config.Config;
 
 public class CheckBox extends JCheckBox{
 
@@ -11,7 +11,7 @@ public class CheckBox extends JCheckBox{
 	public CheckBox(String text) {
 		super(text);
 		setBackground(Config.SECONDARY_COLOR);
-		setForeground(Config.MAIN_FOREGROUND);
+		setForeground(Config.CONSTRASTED_FOREGROUND);
 	}
 
 
