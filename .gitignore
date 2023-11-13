@@ -13,4 +13,5 @@ data/*
 img/*
 doc/*
 build/*
-
+javadoc/*
+*crashlog.txt*
