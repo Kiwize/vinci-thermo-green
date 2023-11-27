@@ -23,6 +23,7 @@ public class Stadium implements IModel {
 
 	private String id;
 	private String name;
+	private String maintenanceNumber;
 	private int id_user;
 
 	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
@@ -147,6 +148,10 @@ public class Stadium implements IModel {
 
 	public interface IMesureStadiumMatch {
 		void onMatch(int mesureID);
+	}
+
+	public String getContactNumber() {
+		return maintenanceNumber;
 	}
 
 }

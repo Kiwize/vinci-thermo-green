@@ -57,6 +57,8 @@ public class Controller {
 	private float overflowMax;
 	
 	private HashMap<String, String> LOCALE_TAG_MAP;
+	
+	private SMSSender smsSender;
 
 	// Views
 	private final ConsoleGUI consoleGui;
@@ -79,7 +81,8 @@ public class Controller {
 
 	public Controller() throws ParseException {
 		cfgManager = new ConfigManager(Config.DBENVFILEPATH);
-
+		
+		smsSender = new SMSSender(this);
 		rc = ResourceBundle.getBundle("locale/locale",
 				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
 
@@ -403,6 +406,14 @@ public class Controller {
 
 	public ConfigManager getConfigManager() {
 		return cfgManager;
+	}
+	
+	public ConsoleGUI getConsoleGui() {
+		return consoleGui;
+	}
+	
+	public SMSSender getSmsSender() {
+		return smsSender;
 	}
 
 	/**

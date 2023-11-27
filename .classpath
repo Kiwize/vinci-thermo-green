@@ -14,5 +14,15 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jasypt-1.9.3.jar"/>
+	<classpathentry kind="lib" path="lib/client-8.0.0-rc2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.5.14.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.4.16.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-annotations-2.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.9.9.3.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-datatype-jsr310-2.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jwt-1.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
