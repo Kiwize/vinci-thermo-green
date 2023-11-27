@@ -7,6 +7,18 @@ import java.util.ArrayList;
 
 import control.Controller;
 
+/**
+* Represents a stadium.
+* 
+* <ul>
+* <li> A stadium is related to a unique user and to multiples mesures.
+* <li> It contains a name and the ID of the user who manage it.
+* </ul>
+*
+* @author Thomas PRADEAU
+* @version 3.0.0
+*
+*/
 public class Stadium implements IModel {
 
 	private String id;
@@ -16,6 +28,16 @@ public class Stadium implements IModel {
 	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
 	private final Statement secondStatement = Controller.INSTANCE.getDB().getStatement(1);
 
+	/**
+	 * <p>
+	 * Selects a stadium from his ID.
+	 * </p>
+	 * 
+	 * @param id - The stadium ID
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public Stadium(String id) {
 		try {
 			final ResultSet result = currentStatement.executeQuery(
@@ -59,6 +81,16 @@ public class Stadium implements IModel {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Selects distincts zones from the stadium.
+	 * </p>
+	 * 
+	 * @return An arraylist that contains the zones.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public ArrayList<String> getZones() {
 		try {
 			final ResultSet res = currentStatement
@@ -77,6 +109,16 @@ public class Stadium implements IModel {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Select all mesures from the stadium.
+	 * </p>
+	 * 
+	 * @param action - A callback method which describes what to do on every result.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public void getMesures(IMesureStadiumMatch action) {
 		try {
 			final ResultSet res = secondStatement

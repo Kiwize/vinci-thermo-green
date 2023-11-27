@@ -1,6 +1,3 @@
-/**
- * @author J�r�me Valenti
- */
 package model;
 
 import java.sql.ResultSet;
@@ -14,45 +11,44 @@ import java.util.Locale;
 import control.Controller;
 
 /**
- * <p>
- * Des capteurs mesure r�guli�rement la temp�rature de la pelouse.
- * </p>
- * <p>
- * Pour chaque capteur :
- * </p>
+ * Represents a mesure from a stadium.
+ * 
  * <ul>
- * <li>les mesures sont donn&eacute;es en degr&eacute; Fahrenheit;<br />
- * </li>
- * <li>localis&eacute;es par le d&eacute;coupage du terrain en zones;<br />
- * </li>
- * <li>horadat&eacute;ee par la date et l'heure.<br />
- * </li>
+ * <li> A mesure is related to a unique zone.
+ * <li> Each stadium contains multiple zones.
+ * <li> A mesure contains the value in degrees farhenheit, the date and time when the mesure has been taken and the zone from the stadium.
  * </ul>
  *
- * @author jvalenti
- * @version 2.0.0
+ * @author Thomas PRADEAU
+ * @version 3.0.0
  *
  */
 public class Mesure implements IModel {
 
 	private int id;
-
-	/**
-	 *numZone contient le num�ro de la zone mesur�e
-	 */
+	
 	private int numZone;
-	/**
-	 * horoDate contient la date et l'heure de la mesure au format aa-mm-jj hh:mm
-	 */
 	private Date horoDate;
-	/**
-	 * valFahrenheit contient la valeur de la temp�rature mesur�e en degr�
-	 * Fahrenheit
-	 */
 	private float fahrenheit;
 	private String IDStadium;
+	
+	/**
+	 * <p>
+	 * Current statement use to execute queries to database.
+	 * </p>
+	 */
 	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
 
+	/**
+	 * <p>
+	 * Selects a mesure from his ID.
+	 * </p>
+	 * 
+	 * @param id - The mesure ID
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version  3.0.0
+	 */
 	public Mesure(int id) {
 		try {
 			final ResultSet result = currentStatement.executeQuery(
@@ -106,9 +102,11 @@ public class Mesure implements IModel {
 	}
 
 	/**
-	 * Convertit Fahrenheit en �Celsius
-	 * @since 2.0.0
-	 * @return float t�Celsius
+	 * <p>
+	 * Converts farhenheit to celsius.
+	 * </p>
+	 * @since 3.0.0
+	 * @return float celsius value.
 	 */
 	public float getCelsius() {
 		return (fahrenheit - 32.0f) / 1.8f;

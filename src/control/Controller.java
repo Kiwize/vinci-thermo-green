@@ -1,6 +1,3 @@
-/**
- * @author J�r�me Valenti
- */
 package control;
 
 import java.awt.event.WindowEvent;
@@ -35,23 +32,22 @@ import view.LoginView;
 import view.PasswordChangeView;
 
 /**
- * <p>
- * Le cont&ocirc;lleur :
- * </p>
+ * The main controller :
  * <ol>
- * <li>lit les mesures de temp�rature dans un fichier texte</li>
- * <li>retourne la collection des mesures<br />
- * </li>
+ * <li> Initializes views and manage main program's functionalities.
  * </ol>
- *
- * @author J�r�me Valenti
- * @version 2.0.0
- *
+ * 
+ * @author Thomas PRADEAU
+ * @version 3.0.0
  */
 public class Controller {
 
+	//TODO Remove static controller instance
 	public static Controller INSTANCE;
 
+	/**
+	 * Resource bundle use for internationalization.
+	 */
 	private ResourceBundle rc;
 
 	private ConfigManager cfgManager;
@@ -72,6 +68,13 @@ public class Controller {
 	private final ArrayList<Stadium> stadiums = new ArrayList<>();
 	private User user;
 
+	/**
+	 * <p>
+	 * PasswordValidator is a class provided by the <b>Passay</b> library.
+	 * This class specifies different rules for passwords to be valids. This class
+	 * is used for the password change use case.
+	 * </p>
+	 */
 	private final PasswordValidator passwordValidator;
 
 	public Controller() throws ParseException {
@@ -108,10 +111,15 @@ public class Controller {
 	}
 
 	/**
+	 * <p>
 	 * Submit and verify credentials supplied by the user.
+	 * </p>
 	 *
 	 * @param username
 	 * @param password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public void submitLogins(String username, String password) {
 		if (user.authenticate(username, password)) {
@@ -130,11 +138,16 @@ public class Controller {
 	}
 
 	/**
+	 * <p>
 	 * Asks controller to show password change view if the logins provided by the
 	 * user are correct.
+	 * </p>
 	 * 
 	 * @param username
 	 * @param password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public void submitPasswordChange(String username, String password) {
 		if (user.authenticate(username, password)) {
@@ -146,6 +159,14 @@ public class Controller {
 		}
 	}
 
+	/**
+	 * <p>
+	 * Get stadiums managed by the current logged user.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	private void gatherUserStadiums() {
 		user.getUserStadiums((stadiumID) -> {
 			Stadium stadium = new Stadium(stadiumID);
@@ -156,6 +177,16 @@ public class Controller {
 		});
 	}
 
+	/**
+	 * <p>
+	 * Updates displayed locale. 
+	 * </p>
+	 * 
+	 * @param newLocale - The new locale to display.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public void updateDisplayedLocale(Locale newLocale) {
 		if (!cfgManager.updateSettings("locale.preferred", newLocale.toLanguageTag()))
 			System.err.println("Error updating config file !");
@@ -169,6 +200,17 @@ public class Controller {
 		consoleGui.repaint();
 	}
 
+	/**
+	 * <p>
+	 * Change user password, asks for authentication first.
+	 * </p>
+	 * 
+	 * @param password - New password of the user who needs to change his password
+	 * @param confirm - Confirmation of the previous password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public void changePassword(String password, String confirm) {
 		if (password.equals(confirm)) {
 			final PasswordData passwordData = new PasswordData(password);
@@ -197,16 +239,21 @@ public class Controller {
 	}
 
 	/**
-	 * Filtre la collection des mesures en fonction des param&egrave;tres :
-	 * <li>la zone (null = toutes les zones)</li>
-	 * <li>la date de d&eacute;but (null = &agrave; partir de l'origine)</li>
-	 * <li>la date de fin (null = jusqu'&agrave; la fin)<br />
+	 * <p>
+	 * Filter mesures by stadium zones.
+	 * A stadium contains multiple zones.
+	 * </p>
+	 * 
+	 * @param zoneFilter - The zone filter.
+	 * @return The array list that contains the filtered mesures.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
-	// public void filtrerLesMesure(String laZone, Date leDebut, Date lafin) {
-	public ArrayList<Mesure> filterMesures(String laZone) {
+	public ArrayList<Mesure> filterMesures(String zoneFilter) {
 		final ArrayList<Mesure> laSelection = new ArrayList<>();
 		for (final Mesure mesure : mesures) {
-			if ((laZone.compareTo("*") == 0) || (Integer.parseInt(laZone) == mesure.getNumZone())) {
+			if ((zoneFilter.compareTo("*") == 0) || (Integer.parseInt(zoneFilter) == mesure.getNumZone())) {
 				laSelection.add(mesure);
 			}
 		}
@@ -214,12 +261,18 @@ public class Controller {
 	}
 
 	/**
+	 * <p>
 	 * Update overflow status by replacing the button wich represent the overflow
 	 * status. If temps are outside the user define temp range, the button become
 	 * red, green otherwise.
-	 * 
+	 * </p>
+	 * <p>
 	 * Temps that are outside the range are displayed in the scroll table in the
 	 * console view.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public void updateOverflowStatus() {
 		if (overflowMax > overflowMin) {
@@ -239,6 +292,17 @@ public class Controller {
 
 	}
 
+	/**
+	 * <p>
+	 * This method verifies the new password provided by the user from the PasswordChangeView class and
+	 * check if this password respects passwords strength specifications from the <b>passwordValidator</b> object.
+	 * </p>
+	 * 
+	 * 
+	 * @param password
+	 * @param confirmation
+	 * @return
+	 */
 	public HashMap<EPasswordError, Boolean> passwordFieldUpdate(String password, String confirmation) {
 		final HashMap<EPasswordError, Boolean> errsBuffer = new HashMap<>();
 		final String specialChars = "/*!@#$%^&*()\"{}_[]|\\?/<>,.";
@@ -280,16 +344,19 @@ public class Controller {
 		return errsBuffer;
 	}
 
+	/**
+	 * <p>
+	 * Quit the application by closing the database connection and the displayed views.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public void quit() {
 		db.closeStatements();
 		db.close();
 	}
 
-	/**
-	 * Retourne la collection des mesures
-	 * 
-	 * @return ArrayList<Mesure>
-	 */
 	public ArrayList<Mesure> getMesures() {
 		return mesures;
 	}
@@ -339,8 +406,16 @@ public class Controller {
 	}
 
 	/**
+	 * <p>
 	 * Password errors callback enumeration That allows to define error messages for
 	 * each password requirement.
+	 * </p>
+	 * <p>
+	 * Each password errors redefine the callback method from the <b>IPasswordCallback</b> interface.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public enum EPasswordError {
 		// TODO, translate errors messages

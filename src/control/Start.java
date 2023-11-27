@@ -36,11 +36,12 @@ public class Start {
 	}
 
 	/**
+	 * <p>
 	 * Check basic configuration that can prevent the program from running properly.
-	 *
-	 * @return
-	 * @throws SQLException
-	 * @throws ClassNotFoundException
+	 * </p>
+	 * @return - Result as a EError variable.
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public EError chkBoot() {
 		// Database verification
@@ -67,9 +68,15 @@ public class Start {
 	}
 
 	/**
+	 * <p>
 	 * Writes crash logs
-	 * @param error
-	 * @param ex
+	 * By default, logs are written in the directory where the project is launched.
+	 * </p>
+	 * @param error (EError that describes the error that have occured)
+	 * @param ex (The exception instance)
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public void writeCrashLog(EError error, Exception ex) {
 		final Date date = new Date();
@@ -100,9 +107,12 @@ public class Start {
 	}
 
 	/**
+	 * <p>
 	 * Initialization phase, post checking
+	 * </p>
 	 *
 	 * @throws ParseException
+	 * @version 3.0.0
 	 */
 	public void init() throws ParseException {
 		new Controller();

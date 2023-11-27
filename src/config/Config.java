@@ -4,6 +4,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Locale;
 
+/**
+ * <p>
+ * This class contains internal configuration and super global variables.
+ * </p>
+ * 
+ * @author Thomas PRADEAU
+ * @version 3.0.0
+ */
 public class Config {
 
 	// Locale

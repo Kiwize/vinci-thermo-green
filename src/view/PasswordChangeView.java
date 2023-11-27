@@ -18,6 +18,17 @@ import view.component.CheckBox;
 import view.component.Label;
 import view.component.TextField;
 
+/**
+ * Password change view
+ * 
+ * <ul>
+ * <li> Allows users to change their password after authentication.
+ * <li> Checks password validation condition with the <b>Passay</b> library.
+ * </ul>
+ * 
+ * @author Thomas PRADEAU
+ * @version 3.0.0
+ */
 public class PasswordChangeView extends JFrame {
 
 	private static final long serialVersionUID = 8961167478637393103L;
@@ -32,6 +43,14 @@ public class PasswordChangeView extends JFrame {
 	private final CheckBox chkboxMinLength;
 	private final CheckBox chkboxDigit;
 
+	/**
+	 * Instantiate this view.
+	 * 
+	 * @param controller - The current controller.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public PasswordChangeView(Controller controller) {
 		setResizable(false);
 		getContentPane().setBackground(Config.SECONDARY_COLOR);
@@ -116,32 +135,59 @@ public class PasswordChangeView extends JFrame {
 		super.setSize(500, 250);
 	}
 
+	/**
+	 * Shows password status, by checking and displaying by checking or not the check boxes.
+	 * This method is called every time the user type in the password fields.
+	 * 
+	 * @param errors - A hashmap that contains each password validation errors and his status (present or not).
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
 	public void showPasswordStatus(HashMap<EPasswordError, Boolean> errors) {
 		for(final EPasswordError eerr : EPasswordError.values()) {
 			eerr.getCallbackError().match(this, !errors.get(eerr));
 		}
 	}
 
+	/**
+	 * @return The check box that represents the similar password status.
+	 */
 	public JCheckBox getChkboxSimilarPasswords() {
 		return chkboxSimilarPasswords;
 	}
-
+	
+	/**
+	 * @return The check box that represents the minimal length status.
+	 */
 	public JCheckBox getChkboxMinLength() {
 		return chkboxMinLength;
 	}
-
+	
+	/**
+	 * @return The check box that represents the uppercase character status.
+	 */
 	public JCheckBox getChkboxMajuscule() {
 		return chkboxMajuscule;
 	}
-
+	
+	/**
+	 * @return The check box that represents the special character status.
+	 */
 	public JCheckBox getChkboxSpecialChar() {
 		return chkboxSpecialChar;
 	}
-
+	
+	/**
+	 * @return The check box that represents the lowercase character status.
+	 */
 	public JCheckBox getChkboxMinuscule() {
 		return chkboxMinuscule;
 	}
-
+	
+	/**
+	 * @return The check box that represents the digit status.
+	 */
 	public JCheckBox getChkboxDigit() {
 		return chkboxDigit;
 	}

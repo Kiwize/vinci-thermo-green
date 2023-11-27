@@ -1,5 +1,13 @@
 package control;
 
+/**
+ * <p>
+ * Enumeration that describes all errors that can occur during the application lifetime.
+ * </p>
+ * 
+ * @author Thomas PRADEAU
+ * @version 3.0.0
+ */
 public enum EError {
 
 	NO_ERROR("", 0),
