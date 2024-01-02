@@ -9,9 +9,6 @@ biblio/*
 Thumbs.db
 .idea/*
 bin/*
-data/*
 img/*
-doc/*
 build/*
-javadoc/*
 *crashlog.txt*
