@@ -1,88 +1,266 @@
-/**
- * @author J�r�me Valenti 
- */
 package control;
 
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
-import javax.swing.JFrame;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
+import org.passay.CharacterRule;
+import org.passay.EnglishCharacterData;
+import org.passay.EnglishSequenceData;
+import org.passay.IllegalSequenceRule;
+import org.passay.LengthRule;
+import org.passay.PasswordData;
+import org.passay.PasswordValidator;
+import org.passay.RuleResult;
+import org.passay.WhitespaceRule;
+
+import config.Config;
+import config.ConfigManager;
 import model.Mesure;
-import utils.FileUtils;
+import model.Stadium;
+import model.User;
+import utils.DatabaseHelper;
 import view.ConsoleGUI;
 import view.LoginView;
+import view.PasswordChangeView;
 
 /**
- * <p>
- * Le cont&ocirc;lleur :
- * </p>
+ * The main controller :
  * <ol>
- * <li>lit les mesures de temp�rature dans un fichier texte</li>
- * <li>retourne la collection des mesures<br />
- * </li>
+ * <li> Initializes views and manage main program's functionalities.
  * </ol>
  * 
- * @author J�r�me Valenti
- * @version 2.0.0
- *
+ * @author Thomas PRADEAU
+ * @version 3.0.0
  */
 public class Controller {
 
-	//Views
-	private ConsoleGUI consoleGui;
-	private LoginView loginView;
+	//TODO Remove static controller instance
+	public static Controller INSTANCE;
+
+	/**
+	 * Resource bundle use for internationalization.
+	 */
+	private ResourceBundle rc;
+
+	private ConfigManager cfgManager;
+	private DatabaseHelper db;
+
+	private float overflowMin;
+	private float overflowMax;
 	
-	//Models
-	private ArrayList<Mesure> mesures = new ArrayList<Mesure>();
+	private HashMap<String, String> LOCALE_TAG_MAP;
 	
+	private SMSSender smsSender;
+
+	// Views
+	private final ConsoleGUI consoleGui;
+	private final LoginView loginView;
+	private final PasswordChangeView passchview;
+
+	// Models
+	private ArrayList<Mesure> mesures = new ArrayList<>();
+	private final ArrayList<Stadium> stadiums = new ArrayList<>();
+	private User user;
+
+	/**
+	 * <p>
+	 * PasswordValidator is a class provided by the <b>Passay</b> library.
+	 * This class specifies different rules for passwords to be valids. This class
+	 * is used for the password change use case.
+	 * </p>
+	 */
+	private final PasswordValidator passwordValidator;
+
 	public Controller() throws ParseException {
-		//TODO Replace CSV data by database
-		FileUtils.lireCSV("data/mesures.csv", mesures);
+		cfgManager = new ConfigManager(Config.DBENVFILEPATH);
 		
-		this.consoleGui = new ConsoleGUI(this);
-		this.loginView = new LoginView(this);
+		smsSender = new SMSSender(this);
+		rc = ResourceBundle.getBundle("locale/locale",
+				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+
+		Controller.INSTANCE = this;
+		passwordValidator = new PasswordValidator(
+				new LengthRule(Config.MIN_PASSWORD_LENGTH, Config.MAX_PASSWORD_LENGTH),
+				new CharacterRule(EnglishCharacterData.LowerCase, 1),
+				new CharacterRule(EnglishCharacterData.UpperCase, 1), new CharacterRule(EnglishCharacterData.Digit, 1),
+				new CharacterRule(EnglishCharacterData.Special, 1),
+				new IllegalSequenceRule(EnglishSequenceData.Alphabetical, 4, false),
+				new IllegalSequenceRule(EnglishSequenceData.Numerical, 4, false),
+				new IllegalSequenceRule(EnglishSequenceData.USQwerty, 4, false), new WhitespaceRule());
+
+		try {
+			db = new DatabaseHelper(cfgManager);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
 		
+		LOCALE_TAG_MAP = new HashMap<>();
+		LOCALE_TAG_MAP.put(Locale.US.toLanguageTag(), Locale.US.getDisplayLanguage());
+		LOCALE_TAG_MAP.put(Locale.FRANCE.toLanguageTag(), Locale.FRANCE.getDisplayLanguage());
+		
+		user = new User();
+		consoleGui = new ConsoleGUI(this);
+		loginView = new LoginView(this);
+		passchview = new PasswordChangeView(this);
 		loginView.setVisible(true);
 	}
-	
+
 	/**
+	 * <p>
 	 * Submit and verify credentials supplied by the user.
+	 * </p>
+	 *
 	 * @param username
 	 * @param password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
 	public void submitLogins(String username, String password) {
-		String fileData = FileUtils.readTxtFile("data/logins.txt"); //TODO Replace with database access to check credentials
-		String[] credentials = fileData.split("\n");
-		
-		if(username.equals(credentials[0]) && password.equals(credentials[1])) {
-			System.out.println("Access granted !");
+		if (user.authenticate(username, password)) {
 			loginView.setVisible(false);
-			consoleGui.setVisible(true);
+
+			gatherUserStadiums();
+			consoleGui.prepareDisplay();
+
+			// Asks for connection windows to close.
+			loginView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
+			passchview.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
 		} else {
-			System.err.println("Invalid username and password !");
+			JOptionPane.showMessageDialog(loginView.getComponent(0), rc.getString("loginViewInvalidCredentials"),
+					rc.getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	/**
-	 * Filtre la collection des mesures en fonction des param&egrave;tres :
-	 * <li>la zone (null = toutes les zones)</li>
-	 * <li>la date de d&eacute;but (null = &agrave; partir de l'origine)</li>
-	 * <li>la date de fin (null = jusqu'&agrave; la fin)<br />
+	 * <p>
+	 * Asks controller to show password change view if the logins provided by the
+	 * user are correct.
+	 * </p>
+	 * 
+	 * @param username
+	 * @param password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
-	// public void filtrerLesMesure(String laZone, Date leDebut, Date lafin) {
-	public ArrayList<Mesure> filtrerLesMesure(String laZone) {
-		// Parcours de la collection
-		// Ajout � laSelection des objets qui correspondent aux param�tres
-		// Envoi de la collection
-		ArrayList<Mesure> laSelection = new ArrayList<Mesure>();
-		for (Mesure mesure : mesures) {
-			if (laZone.compareTo("*") == 0) {
+	public void submitPasswordChange(String username, String password) {
+		if (user.authenticate(username, password)) {
+			loginView.setVisible(false);
+			passchview.setVisible(true);
+		} else {
+			JOptionPane.showMessageDialog(loginView.getComponent(0), rc.getString("loginViewInvalidCredentials"),
+					rc.getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Get stadiums managed by the current logged user.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	private void gatherUserStadiums() {
+		user.getUserStadiums((stadiumID) -> {
+			Stadium stadium = new Stadium(stadiumID);
+			stadiums.add(stadium);
+			stadium.getMesures((mesureID) -> {
+				mesures.add(new Mesure(mesureID));
+			});
+		});
+	}
+
+	/**
+	 * <p>
+	 * Updates displayed locale. 
+	 * </p>
+	 * 
+	 * @param newLocale - The new locale to display.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	/*
+	public void updateDisplayedLocale(Locale newLocale) {
+		if (!cfgManager.updateSettings("locale.preferred", newLocale.toLanguageTag()))
+			System.err.println("Error updating config file !");
+		rc = ResourceBundle.getBundle("locale/locale",
+				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+
+		consoleGui.updateComponentsText();
+		
+		consoleGui.invalidate();
+		consoleGui.validate();
+		consoleGui.repaint();
+	}
+
+	/**
+	 * <p>
+	 * Change user password, asks for authentication first.
+	 * </p>
+	 * 
+	 * @param password - New password of the user who needs to change his password
+	 * @param confirm - Confirmation of the previous password
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	public void changePassword(String password, String confirm) {
+		if (password.equals(confirm)) {
+			final PasswordData passwordData = new PasswordData(password);
+			final RuleResult validate = passwordValidator.validate(passwordData);
+
+			if (!validate.isValid()) {
+				JOptionPane.showMessageDialog(loginView.getComponent(0), "Mot de passe non conforme !",
+						rc.getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			if (user.updatePassword(password)) {
+				JOptionPane.showMessageDialog(loginView.getComponent(0), "Mot de passe changé avec succés !",
+						"Mot de passe modifié.", JOptionPane.INFORMATION_MESSAGE);
+
+				gatherUserStadiums();
+				consoleGui.prepareDisplay();
+
+				loginView.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
+				passchview.dispatchEvent(new WindowEvent(loginView, WindowEvent.WINDOW_CLOSING));
+			}
+		} else {
+			JOptionPane.showMessageDialog(loginView.getComponent(0), "Les mots de passe sont différents !",
+					rc.getString("loginViewError"), JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Filter mesures by stadium zones.
+	 * A stadium contains multiple zones.
+	 * </p>
+	 * 
+	 * @param zoneFilter - The zone filter.
+	 * @return The array list that contains the filtered mesures.
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	public ArrayList<Mesure> filterMesures(String zoneFilter) {
+		final ArrayList<Mesure> laSelection = new ArrayList<>();
+		for (final Mesure mesure : mesures) {
+			if ((zoneFilter.compareTo("*") == 0) || (Integer.parseInt(zoneFilter) == mesure.getNumZone())) {
 				laSelection.add(mesure);
-			} else {
-				if (laZone.compareTo(mesure.getNumZone()) == 0) {
-					laSelection.add(mesure);
-				}
 			}
 		}
 		return laSelection;
@@ -90,16 +268,206 @@ public class Controller {
 
 	/**
 	 * <p>
-	 * Retourne la collection des mesures
+	 * Update overflow status by replacing the button wich represent the overflow
+	 * status. If temps are outside the user define temp range, the button become
+	 * red, green otherwise.
+	 * </p>
+	 * <p>
+	 * Temps that are outside the range are displayed in the scroll table in the
+	 * console view.
 	 * </p>
 	 * 
-	 * @return ArrayList<Mesure>
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
 	 */
+	public void updateOverflowStatus() {
+		try {
+			if (overflowMax > overflowMin) {
+				for (Mesure mesure : mesures) {
+					if (mesure.getIDStadium().equals(consoleGui.getCurrentStadium().getStadiumID())) {
+						consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_green_button.png"))));
+
+						// Temp outside range
+						if (mesure.getCelsius() < overflowMin || mesure.getCelsius() > overflowMax) {
+							consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_red_button.png"))));
+
+							// TODO Display temp in red in the table and/or in the graph
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * <p>
+	 * This method verifies the new password provided by the user from the PasswordChangeView class and
+	 * check if this password respects passwords strength specifications from the <b>passwordValidator</b> object.
+	 * </p>
+	 * 
+	 * 
+	 * @param password
+	 * @param confirmation
+	 * @return
+	 */
+	public HashMap<EPasswordError, Boolean> passwordFieldUpdate(String password, String confirmation) {
+		final HashMap<EPasswordError, Boolean> errsBuffer = new HashMap<>();
+		final String specialChars = "/*!@#$%^&*()\"{}_[]|\\?/<>,.";
+
+		for (final EPasswordError error : EPasswordError.values()) {
+			errsBuffer.put(error, true);
+		}
+
+		if (password.equals(confirmation)) {
+			errsBuffer.replace(EPasswordError.SIMILAR_PASSWORDS, false);
+		}
+
+		if (password.length() >= Config.MIN_PASSWORD_LENGTH) {
+			errsBuffer.replace(EPasswordError.MIN_LENGTH, false);
+		}
+
+		for (int i = 0; i < password.length(); i++) {
+			final char c = password.charAt(i);
+
+			if (Character.isUpperCase(c)) {
+				errsBuffer.replace(EPasswordError.REQUIRE_UPPERCASE, false);
+			}
+
+			if (Character.isLowerCase(c)) {
+				errsBuffer.replace(EPasswordError.REQUIRE_LOWERCASE, false);
+			}
+
+			if (Character.isDigit(c)) {
+				errsBuffer.replace(EPasswordError.REQUIRE_DIGIT, false);
+			}
+
+			if (specialChars.contains(password.substring(i, i + 1))) {
+				errsBuffer.replace(EPasswordError.REQUIRE_SPECIAL, false);
+			}
+		}
+
+		passchview.showPasswordStatus(errsBuffer);
+
+		return errsBuffer;
+	}
+
+	/**
+	 * <p>
+	 * Quit the application by closing the database connection and the displayed views.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	public void quit() {
+		db.closeStatements();
+		db.close();
+	}
+
 	public ArrayList<Mesure> getMesures() {
 		return mesures;
 	}
-	
+
 	public void setMesures(ArrayList<Mesure> mesures) {
 		this.mesures = mesures;
+	}
+
+	public ResourceBundle getResourceBundle() {
+		return rc;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public DatabaseHelper getDB() {
+		return db;
+	}
+
+	public float getOverflowMax() {
+		return overflowMax;
+	}
+
+	public float getOverflowMin() {
+		return overflowMin;
+	}
+
+	public void setOverflowMax(float overflowMax) {
+		this.overflowMax = overflowMax;
+	}
+
+	public void setOverflowMin(float overflowMin) {
+		this.overflowMin = overflowMin;
+	}
+
+	public ArrayList<Stadium> getStadiums() {
+		return stadiums;
+	}
+
+	public PasswordChangeView getPasswordChangeView() {
+		return passchview;
+	}
+
+	public ConfigManager getConfigManager() {
+		return cfgManager;
+	}
+	
+	public ConsoleGUI getConsoleGui() {
+		return consoleGui;
+	}
+	
+	public SMSSender getSmsSender() {
+		return smsSender;
+	}
+
+	/**
+	 * <p>
+	 * Password errors callback enumeration That allows to define error messages for
+	 * each password requirement.
+	 * </p>
+	 * <p>
+	 * Each password errors redefine the callback method from the <b>IPasswordCallback</b> interface.
+	 * </p>
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version 3.0.0
+	 */
+	public enum EPasswordError {
+		// TODO, translate errors messages
+		SIMILAR_PASSWORDS("Les mots de passes sont différents", (PasswordChangeView frame, boolean state) -> {
+			frame.getChkboxSimilarPasswords().setSelected(state);
+		}),
+
+		REQUIRE_UPPERCASE("Une majuscule requise", (PasswordChangeView frame, boolean state) -> {
+			frame.getChkboxMajuscule().setSelected(state);
+		}), REQUIRE_LOWERCASE("Une minuscule requise", (PasswordChangeView frame, boolean state) -> {
+			frame.getChkboxMinuscule().setSelected(state);
+		}), REQUIRE_SPECIAL("Un caractère spécial requis", (PasswordChangeView frame, boolean state) -> {
+			frame.getChkboxSpecialChar().setSelected(state);
+		}), REQUIRE_DIGIT("Un chiffre requis", (PasswordChangeView frame, boolean state) -> {
+			frame.getChkboxDigit().setSelected(state);
+		}), MIN_LENGTH("Le mot de passe doit faire " + Config.MIN_PASSWORD_LENGTH + " caractères minimum",
+				(PasswordChangeView frame, boolean state) -> {
+					frame.getChkboxMinLength().setSelected(state);
+				});
+
+		private final String textError;
+		private final IPasswordCallback callbackError;
+
+		EPasswordError(String textError, IPasswordCallback callbackError) {
+			this.textError = textError;
+			this.callbackError = callbackError;
+		}
+
+		public String getTextError() {
+			return textError;
+		}
+
+		public IPasswordCallback getCallbackError() {
+			return callbackError;
+		}
 	}
 }

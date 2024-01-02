@@ -1,69 +1,87 @@
-/**
- * @author J�r�me Valenti
- */
 package model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+
+import control.Controller;
 
 /**
- * <p>
- * Des capteurs mesure r�guli�rement la temp�rature de la pelouse.
- * </p>
- * <p>
- * Pour chaque capteur :
- * </p>
- * <ul>
- * <li>les mesures sont donn&eacute;es en degr&eacute; Fahrenheit;<br />
- * </li>
- * <li>localis&eacute;es par le d&eacute;coupage du terrain en zones;<br />
- * </li>
- * <li>horadat&eacute;ee par la date et l'heure.<br />
- * </li>
- * </ul>
+ * Represents a mesure from a stadium.
  * 
- * @author jvalenti
- * @version 2.0.0
+ * <ul>
+ * <li> A mesure is related to a unique zone.
+ * <li> Each stadium contains multiple zones.
+ * <li> A mesure contains the value in degrees farhenheit, the date and time when the mesure has been taken and the zone from the stadium.
+ * </ul>
+ *
+ * @author Thomas PRADEAU
+ * @version 3.0.0
  *
  */
-public class Mesure {
-	/**
-	 * <p>
-	 * numZone contient le num�ro de la zone mesur�e
-	 * </p>
-	 */
-	private String numZone;
-	/**
-	 * <p>
-	 * horoDate contient la date et l'heure de la mesure au format aa-mm-jj hh:mm
-	 * </p>
-	 */
+public class Mesure implements IModel {
+
+	private int id;
+	
+	private int numZone;
 	private Date horoDate;
+	private float fahrenheit;
+	private String IDStadium;
+	
 	/**
 	 * <p>
-	 * valFahrenheit contient la valeur de la temp�rature mesur�e en degr�
-	 * Fahrenheit
+	 * Current statement use to execute queries to database.
 	 * </p>
 	 */
-	private float fahrenheit;
+	private final Statement currentStatement = Controller.INSTANCE.getDB().getStatement(0);
 
-	public Mesure() {
-		this.numZone = new String();
-		this.horoDate = new Date();
-		this.fahrenheit = 0.0f;
+	/**
+	 * <p>
+	 * Selects a mesure from his ID.
+	 * </p>
+	 * 
+	 * @param id - The mesure ID
+	 * 
+	 * @author Thomas PRADEAU
+	 * @version  3.0.0
+	 */
+	public Mesure(int id) {
+		try {
+			final ResultSet result = currentStatement.executeQuery(
+					"SELECT Mesure.num_zone, Mesure.Temp, Mesure.Date_mesure, Mesure.ID_Stadium FROM Mesure WHERE Mesure.ID_mesure = "
+							+ id + ";");
+
+			if (!result.next()) {
+				throw new IllegalArgumentException();
+			} else {
+				this.id = id;
+				numZone = result.getInt("num_zone");
+				fahrenheit = result.getFloat("Temp");
+				horoDate = result.getDate("Date_mesure");
+				IDStadium = result.getString("ID_Stadium");
+			}
+		} catch (final SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public Mesure(String pZone, Date pDate, float pFahrenheit) {
-
-		this.numZone = pZone;
-		this.horoDate = pDate;
-		this.fahrenheit = pFahrenheit;
+	public String getIDStadium() {
+		return IDStadium;
 	}
 
-	public String getNumZone() {
+	public void setIDStadium(String iDStadium) {
+		IDStadium = iDStadium;
+	}
+
+	public int getNumZone() {
 		return numZone;
 	}
 
-	public void setNumZone(String numZone) {
+	public void setNumZone(int numZone) {
 		this.numZone = numZone;
 	}
 
@@ -80,19 +98,46 @@ public class Mesure {
 	}
 
 	public void setFahrenheit(float valFahrenheit) {
-		this.fahrenheit = valFahrenheit;
+		fahrenheit = valFahrenheit;
 	}
 
 	/**
 	 * <p>
-	 * Convertit Fahrenheit en �Celsius
+	 * Converts farhenheit to celsius.
 	 * </p>
-	 * 
-	 * @since 2.0.0
-	 * @return float t�Celsius
+	 * @since 3.0.0
+	 * @return float celsius value.
 	 */
 	public float getCelsius() {
-		// return (float) (valFahrenheit - 32) / 1.8)
 		return (fahrenheit - 32.0f) / 1.8f;
 	}
+
+	@Override
+	public boolean save() {
+		try {
+			return currentStatement.execute("UPDATE Mesure SET Mesure.num_zone = '" + numZone + "', Mesure.Date_mesure='"
+					+ horoDate + "', Mesure.Temp='" + fahrenheit + "', Mesure.ID_Stadium='" + IDStadium
+					+ "' where Mesure.ID_Mesure = " + id + ";");
+
+		} catch (final SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean insert() {
+		try {
+			// Format date if needed
+			final DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH);
+			return currentStatement.execute(
+					"INSERT INTO Mesure (num_zone, Date_mesure, Temp, ID_Stadium) VALUES ('" + numZone + "','"
+							+ format.format(horoDate) + "','" + fahrenheit + "','" + IDStadium + "')");
+
+		} catch (final SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 }
