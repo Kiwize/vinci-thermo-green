@@ -2,7 +2,9 @@ package view;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -70,7 +72,11 @@ public class LoginView extends JFrame {
 		getContentPane().add(btnSubmit);
 
 		final Button visiblePasswordBtn = new Button("", 384, 98);
-		visiblePasswordBtn.setIcon(new ImageIcon("img/visibility24.png"));
+		try {
+			visiblePasswordBtn.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/visibility24.png"))));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		visiblePasswordBtn.setBackgroundVisible(false);
 		visiblePasswordBtn.setBorder(null);
 		visiblePasswordBtn.addMouseListener(new MouseAdapter() {

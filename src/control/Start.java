@@ -1,8 +1,6 @@
 package control;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,17 +42,6 @@ public class Start {
 	 * @version 3.0.0
 	 */
 	public EError chkBoot() {
-		// Database verification
-		try {
-			final File file = new File(Config.DBENVFILEPATH_OLD);
-			final FileReader fileReader = new FileReader(file);
-			fileReader.close();
-		} catch (final IOException e) {
-			writeCrashLog(EError.MISSING_INVALID_CONFIG, e);
-			e.printStackTrace();
-			return EError.MISSING_INVALID_CONFIG;
-		}
-
 		try {
 			final DatabaseHelper db = new DatabaseHelper(new ConfigManager(Config.DBENVFILEPATH));
 			db.close();

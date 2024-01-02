@@ -29,6 +29,7 @@ public class DatabaseHelper {
 		url = configManager.getProperties().getProperty("db.url");
 		username = configManager.getProperties().getProperty("db.username");
 		password = configManager.getProperties().getProperty("db.password");
+		System.out.println(password);
 
 		con = DriverManager.getConnection(url, username, password);
 
