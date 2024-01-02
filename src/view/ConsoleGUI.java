@@ -6,17 +6,18 @@ package view;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -147,7 +148,11 @@ public class ConsoleGUI extends JFrame {
 		loadedStadiums = new HashMap<>();
 		isReady = false;
 
-		setIconImage(Toolkit.getDefaultToolkit().getImage("img/vinci_ico.jpg"));
+		try {
+			setIconImage(ImageIO.read(getClass().getResourceAsStream("/img/vinci_ico.jpg")));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		setTitle(controller.getResourceBundle().getString("consoleGUIViewWindowTitle"));
 		setSize(712, 560);
 		setResizable(false);
@@ -219,7 +224,11 @@ public class ConsoleGUI extends JFrame {
 		criteriaPanel.add(dateFin);
 
 		final Label vinciLogoLabel = new Label("");
-		vinciLogoLabel.setIcon(new ImageIcon("img/s_vinci.png"));
+		try {	
+			vinciLogoLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_vinci.png"))));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		vinciLogoLabel.setBounds(221, 11, 95, 35);
 		criteriaPanel.add(vinciLogoLabel);
 
@@ -340,7 +349,11 @@ public class ConsoleGUI extends JFrame {
 		pnlBounds.add(lblDebordMax);
 
 		alertLabel = new Label("");
-		alertLabel.setIcon(new ImageIcon("img/s_green_button.png"));
+		try {
+			alertLabel.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_green_button.png"))));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		alertLabel.setBounds(270, 42, 75, 75);
 		pnlBounds.add(alertLabel);
 
@@ -382,7 +395,7 @@ public class ConsoleGUI extends JFrame {
 		localeDropdown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isReady) {
-					controller.updateDisplayedLocale((Locale) localeDropdown.getSelectedItem());
+					//controller.updateDisplayedLocale((Locale) localeDropdown.getSelectedItem());
 				}
 			}
 		});

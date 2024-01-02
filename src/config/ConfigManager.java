@@ -1,9 +1,7 @@
 package config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
@@ -14,8 +12,8 @@ import org.jasypt.properties.EncryptableProperties;
 
 /**
  * <p>
- * This class loads and manage properties file for the application.
- * It uses the <b>Properties</b> class from the <b>java.util</b> JDK Package.
+ * This class loads and manage properties file for the application. It uses the
+ * <b>Properties</b> class from the <b>java.util</b> JDK Package.
  * </p>
  * 
  * @author Thomas PRADEAU
@@ -40,8 +38,8 @@ public class ConfigManager {
 
 	/**
 	 * <p>
-	 * Loads config file from path.
-	 * The methods needs the password to un-encrypt some protected variables inside the file.
+	 * Loads config file from path. The methods needs the password to un-encrypt
+	 * some protected variables inside the file.
 	 * </p>
 	 * 
 	 * @param filePath - Relative or absolute path to the config file.
@@ -59,8 +57,9 @@ public class ConfigManager {
 		encryptor.setIvGenerator(new RandomIvGenerator());
 
 		Properties properties = new EncryptableProperties(encryptor);
-		try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
-			properties.load(fileInputStream);
+		InputStream inputStream = getClass().getResourceAsStream("/" + filePath);
+		try {
+			properties.load(inputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -73,7 +72,8 @@ public class ConfigManager {
 
 	/**
 	 * <p>
-	 * Verifies if all config properties exists in the file. If not, these are created and set to their default values.
+	 * Verifies if all config properties exists in the file. If not, these are
+	 * created and set to their default values.
 	 * </p>
 	 * 
 	 * @author Thomas PRADEAU
@@ -84,7 +84,7 @@ public class ConfigManager {
 			if (!properties.containsKey(setting))
 				properties.setProperty(setting, DEFAULT_SETTINGS_VALUES.get(setting));
 
-		save();
+		//save();
 	}
 
 	/**
@@ -92,13 +92,15 @@ public class ConfigManager {
 	 * Update existing properties.
 	 * </p>
 	 * 
-	 * @param key - Property key
+	 * @param key   - Property key
 	 * @param value - The new value to set
-	 * @return <b>true</b> if the property has been successfully updated, <b>false</b> otherwise.
+	 * @return <b>true</b> if the property has been successfully updated,
+	 *         <b>false</b> otherwise.
 	 * 
 	 * @author Thomas PRADEAU
 	 * @version 3.0.0
 	 */
+	/*
 	public boolean updateSettings(String key, String value) {
 		if (properties.containsKey(key)) {
 			properties.setProperty(key, value);
@@ -107,7 +109,7 @@ public class ConfigManager {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * <p>
 	 * Save the current loaded configuration to disk.
@@ -116,12 +118,14 @@ public class ConfigManager {
 	 * @author Thomas PRADEAU
 	 * @version 3.0.0
 	 */
+	/*
 	public void save() {
 		try {
-			//TODO Add some comments on config save.
+			// TODO Add some comments on config save.
 			properties.store(new FileWriter(new File(Config.DBENVFILEPATH)), "");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	*/
 }

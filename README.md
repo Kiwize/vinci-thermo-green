@@ -1,14 +1,6 @@
 IMPORTANT :
 
-Afin de faire fonctionner l'application sous forme d'archive JAR exécutable, il est obligatoire
-de créer un répertoire "data" contenant le fichier de configuration "db.env". 
-
-Le fichier "db.env" sera formatté tel qu-il suit :
-
-jdbc:mysql://[IP]:3306/[DB_NAME]
-[USERNAME]
-[PASSWORD]
-
+Utiliser le fichier ressources/data/settings.properties pour configurer l'accès à la base de donées et l'API Vonage.
 
 Une mauvaise configuration empêchera le fonctionnement de l'application et génèrera un fichier log résultant
 du crash de l'application. Référez-vous à celui-ci pour plus d'informations concernant la nature de l'erreur.

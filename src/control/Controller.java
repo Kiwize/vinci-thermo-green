@@ -1,6 +1,7 @@
 package control;
 
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
@@ -190,6 +192,7 @@ public class Controller {
 	 * @author Thomas PRADEAU
 	 * @version 3.0.0
 	 */
+	/*
 	public void updateDisplayedLocale(Locale newLocale) {
 		if (!cfgManager.updateSettings("locale.preferred", newLocale.toLanguageTag()))
 			System.err.println("Error updating config file !");
@@ -278,19 +281,23 @@ public class Controller {
 	 * @version 3.0.0
 	 */
 	public void updateOverflowStatus() {
-		if (overflowMax > overflowMin) {
-			for (Mesure mesure : mesures) {
-				if (mesure.getIDStadium().equals(consoleGui.getCurrentStadium().getStadiumID())) {
-					consoleGui.setAlertIcon(new ImageIcon("img/s_green_button.png"));
+		try {
+			if (overflowMax > overflowMin) {
+				for (Mesure mesure : mesures) {
+					if (mesure.getIDStadium().equals(consoleGui.getCurrentStadium().getStadiumID())) {
+						consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_green_button.png"))));
 
-					// Temp outside range
-					if (mesure.getCelsius() < overflowMin || mesure.getCelsius() > overflowMax) {
-						consoleGui.setAlertIcon(new ImageIcon("img/s_red_button.png"));
+						// Temp outside range
+						if (mesure.getCelsius() < overflowMin || mesure.getCelsius() > overflowMax) {
+							consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_red_button.png"))));
 
-						// TODO Display temp in red in the table and/or in the graph
+							// TODO Display temp in red in the table and/or in the graph
+						}
 					}
 				}
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}

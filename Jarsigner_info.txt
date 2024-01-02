@@ -1,0 +1,11 @@
+> Export certificate from keystore keypair
+
+keytool -export -alias alias-name -keystore ../ressources/data/pubkey -file cert.crt
+
+> Import certificate to Java trusted certificate keystore inside JDK's files / folders (keystore path)
+
+sudo keytool -import -alias alias-name -keystore /usr/lib/jvm/java-17-openjdk/lib/security/cacerts -file cert.crt
+
+> Verify the final signed & certified jar archive
+
+jarsigner -verify Vinci_thermo_green_BUILD_006_02_PROTOTYPE.jar
