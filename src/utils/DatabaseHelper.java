@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.jasypt.properties.EncryptableProperties;
+
 import config.ConfigManager;
 
 public class DatabaseHelper {
@@ -29,7 +31,6 @@ public class DatabaseHelper {
 		url = configManager.getProperties().getProperty("db.url");
 		username = configManager.getProperties().getProperty("db.username");
 		password = configManager.getProperties().getProperty("db.password");
-		System.out.println(password);
 
 		con = DriverManager.getConnection(url, username, password);
 

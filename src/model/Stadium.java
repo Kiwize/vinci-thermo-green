@@ -42,7 +42,7 @@ public class Stadium implements IModel {
 	public Stadium(String id) {
 		try {
 			final ResultSet result = currentStatement.executeQuery(
-					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user FROM Stadium WHERE Stadium.ID_Stadium = '"
+					"SELECT Stadium.ID_Stadium, Stadium.nom_stade, Stadium.id_user, Stadium.MaintenanceContact FROM Stadium WHERE Stadium.ID_Stadium = '"
 							+ id + "';");
 
 			if (!result.next()) {
@@ -51,6 +51,7 @@ public class Stadium implements IModel {
 				this.id = id;
 				name = result.getString("nom_stade");
 				id_user = result.getInt("id_user");
+				maintenanceNumber = result.getString("MaintenanceContact");
 			}
 
 		} catch (final SQLException e) {
@@ -61,7 +62,7 @@ public class Stadium implements IModel {
 	@Override
 	public boolean save() {
 		try {
-			return currentStatement.execute("UPDATE Stadium SET Stadium.nom_stade='" + name + "', Stadium.id_user='" + id_user + "'"
+			return currentStatement.execute("UPDATE Stadium SET Stadium.nom_stade='" + name + "', Stadium.id_user='" + id_user + "', Stadium.MaintenanceContact='" + maintenanceNumber + "'"
 					+ "' where Stadium.ID_Stadium = " + id + ";");
 
 		} catch (final SQLException e) {
@@ -73,8 +74,8 @@ public class Stadium implements IModel {
 	@Override
 	public boolean insert() {
 		try {
-			return currentStatement.execute("INSERT INTO Stadium (ID_Stadium, nom_stade, id_user) VALUES ('" + id + "', '" + name
-					+ "','" + id_user + "')");
+			return currentStatement.execute("INSERT INTO Stadium (ID_Stadium, nom_stade, id_user, MaintenanceContact) VALUES ('" + id + "', '" + name
+					+ "','" + id_user + "','" + maintenanceNumber + "')");
 
 		} catch (final SQLException e) {
 			e.printStackTrace();

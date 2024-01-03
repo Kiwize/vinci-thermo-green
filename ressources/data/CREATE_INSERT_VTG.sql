@@ -27,6 +27,8 @@ CREATE TABLE Mesure(
    CONSTRAINT FK_MESURE_STADIUM FOREIGN KEY(ID_Stadium) REFERENCES Stadium(ID_Stadium)
 );
 
+ALTER TABLE `Stadium` ADD `MaintenanceContact` VARCHAR(16) NOT NULL DEFAULT '0619575215' ;
+
 
 INSERT INTO AppUser (Username, Password)
 VALUES
