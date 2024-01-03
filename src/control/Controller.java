@@ -85,8 +85,7 @@ public class Controller {
 		cfgManager = new ConfigManager(Config.DBENVFILEPATH);
 		
 		smsSender = new SMSSender(this);
-		rc = ResourceBundle.getBundle("locale/locale",
-				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+		rc = ResourceBundle.getBundle("locale/locale", Locale.US);
 
 		Controller.INSTANCE = this;
 		passwordValidator = new PasswordValidator(
@@ -192,12 +191,8 @@ public class Controller {
 	 * @author Thomas PRADEAU
 	 * @version 3.0.0
 	 */
-	/*
 	public void updateDisplayedLocale(Locale newLocale) {
-		if (!cfgManager.updateSettings("locale.preferred", newLocale.toLanguageTag()))
-			System.err.println("Error updating config file !");
-		rc = ResourceBundle.getBundle("locale/locale",
-				Locale.forLanguageTag(cfgManager.getProperties().getProperty("locale.preferred")));
+		rc = ResourceBundle.getBundle("locale/locale", newLocale);
 
 		consoleGui.updateComponentsText();
 		
@@ -286,11 +281,12 @@ public class Controller {
 				for (Mesure mesure : mesures) {
 					if (mesure.getIDStadium().equals(consoleGui.getCurrentStadium().getStadiumID())) {
 						consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_green_button.png"))));
+						consoleGui.updateSendAlertButtonState(false);
 
 						// Temp outside range
 						if (mesure.getCelsius() < overflowMin || mesure.getCelsius() > overflowMax) {
 							consoleGui.setAlertIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/img/s_red_button.png"))));
-
+							consoleGui.updateSendAlertButtonState(true);
 							// TODO Display temp in red in the table and/or in the graph
 						}
 					}

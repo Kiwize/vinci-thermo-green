@@ -39,6 +39,7 @@ import config.Config;
 import control.Controller;
 import model.Mesure;
 import model.Stadium;
+import view.component.Button;
 import view.component.ButtonRound;
 import view.component.CheckBox;
 import view.component.ComboBox;
@@ -91,6 +92,8 @@ public class ConsoleGUI extends JFrame {
 	private final Label lblDebordMin;
 	private final Label lblDebordMax;
 	private final Label selectedStadiumLabel;
+	
+	private final Button sendAlertButton;
 
 	private final ComboBox<String> availableStadiumDropdown;
 
@@ -366,6 +369,15 @@ public class ConsoleGUI extends JFrame {
 		lblOverflowMax.setBounds(91, 67, 114, 21);
 		pnlBounds.add(lblOverflowMax);
 		lblOverflowMax.setColumns(10);
+		
+		sendAlertButton = new Button("Alerter", 250, 12);
+		sendAlertButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				controller.getSmsSender().sendMessage("Le stade " + selectedStadiumLabel.getText() + " relève des températures anormales.");
+			}
+		});
+		sendAlertButton.setBounds(250, 12, 105, 27);
+		pnlBounds.add(sendAlertButton);
 
 		final Panel multiStadiumPanel = new Panel();
 		multiStadiumPanel.setBounds(12, 12, 325, 39);
@@ -395,7 +407,7 @@ public class ConsoleGUI extends JFrame {
 		localeDropdown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (isReady) {
-					//controller.updateDisplayedLocale((Locale) localeDropdown.getSelectedItem());
+					controller.updateDisplayedLocale((Locale) localeDropdown.getSelectedItem());
 				}
 			}
 		});
@@ -674,6 +686,9 @@ public class ConsoleGUI extends JFrame {
 		setVisible(true);
 	}
 
+	/**
+	 * Met à jour la langue affichée.
+	 */
 	public void updateComponentsText() {
 		setTitle(controller.getResourceBundle().getString("consoleGUIViewWindowTitle"));
 		rdbtnCelsius.setText(controller.getResourceBundle().getString("consoleGUIViewCelsius"));
@@ -698,5 +713,14 @@ public class ConsoleGUI extends JFrame {
 
 	public Stadium getCurrentStadium() {
 		return currentStadium;
+	}
+	
+	/**
+	 * Met à jour l'état du bouton, false pour le désactiver si tout va bien, true sinon.
+	 * @param state Nouevel état du bouton.
+	 * @since 4.0.0
+	 */
+	public void updateSendAlertButtonState(boolean state) {
+		sendAlertButton.setEnabled(state);
 	}
 }

@@ -1,1 +1,0 @@
-jarsigner: java.nio.file.NoSuchFileException: Vinci_thermo_green_BUILD_004_PROTOTYPE.jar

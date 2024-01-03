@@ -55,6 +55,9 @@ public class ConfigManager {
 		encryptor.setPassword(password);
 		encryptor.setAlgorithm("PBEWithHMACSHA512AndAES_256");
 		encryptor.setIvGenerator(new RandomIvGenerator());
+		
+		System.out.println(encryptor.encrypt("vtg_dba"));
+		System.out.println(encryptor.encrypt("P@ssw0rd"));
 
 		Properties properties = new EncryptableProperties(encryptor);
 		InputStream inputStream = getClass().getResourceAsStream("/" + filePath);
